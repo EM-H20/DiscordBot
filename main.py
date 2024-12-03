@@ -24,18 +24,18 @@ async def on_ready():
     print(f'{bot.user.name}이 연결되었습니다')
     await bot.change_presence(status=discord.Status.online, activity=discord.Game("코딩"))
 
-    for guild in bot.guilds:
-        if guild.system_channel:
+    for guild in bot.guilds: #봇이 속한 서버 목록
+        if guild.system_channel: #시스템 채널이 있는 경우
             await guild.system_channel.send(f'{bot.user.name}이 연결되었습니다!')
 
 #봇 재부팅 코드
-@bot.command(name='재부팅', aliases=['reboot', 'restart'])
+@bot.command(name='재부팅', aliases=['reboot', 'restart']) #/재부팅, /reboot, /restart
 @commands.is_owner()  # 봇 소유자만 사용 가능
 async def reboot(ctx):
     try:
         await ctx.send('봇을 재부팅합니다...')
-        await bot.change_presence(status=discord.Status.offline)
-        await bot.close()
+        await bot.change_presence(status=discord.Status.offline) #봇 상태를 오프라인으로 변경
+        await bot.close() #봇 연결 종료
         import sys
         import os
         os.execv(sys.executable, ['python'] + sys.argv)
@@ -57,7 +57,7 @@ class ChatBot(commands.Cog):
         self.model = genai.GenerativeModel('gemini-pro') #Gemini API 모델
         self.chat = self.model.start_chat(history=[]) #Gemini API 챗봇
 
-    @commands.command(name='질문', aliases=['ask', 'gemini', 'g']) 
+    @commands.command(name='질문', aliases=['ask', 'gemini', 'g']) #/질문, /ask, /gemini, /g
     async def ask(self, ctx, *, question): #매개변수 : 채널, 질문
         """Gemini에게 질문하기"""
         try:
@@ -82,7 +82,7 @@ class ChatBot(commands.Cog):
             print(f"Gemini Error: {e}")
 
 #====================================[봇 help 코드]======================================
-@bot.group(name='phelp', aliases=['p도움말'])
+@bot.group(name='phelp', aliases=['p도움말']) #/phelp, /p도움말
 async def help_command(ctx):
     """도움말 명령어"""
     if ctx.invoked_subcommand is None:  # 하위 명령어가 없는 경우
@@ -136,10 +136,11 @@ async def help_command(ctx):
         embed.set_footer(text="💡 자세한 내용은 개발자에게 문의해주세요!")
         await ctx.send(embed=embed)
 
+#=============================도움말 오류 처리=========================================
 @help_command.error  # help_command의 오류 처리
-async def help_error(ctx, error):
+async def help_error(ctx, error): #매개변수 : 채널, 오류 /phelp 오류
     """도움말 명령어 오류 처리"""
-    if isinstance(error, commands.CommandNotFound):
+    if isinstance(error, commands.CommandNotFound): #명령어가 존재하지 않는 경우
         embed = discord.Embed(
             title="❌ 오류",
             description="존재하지 않는 도움말 카테고리입니다.",
@@ -161,9 +162,9 @@ async def help_error(ctx, error):
 
 # 일반적인 명령어 오류 처리
 @bot.event
-async def on_command_error(ctx, error):
+async def on_command_error(ctx, error): #/pasld 없는 명령어
     """일반 명령어 오류 처리"""
-    if isinstance(error, commands.CommandNotFound):
+    if isinstance(error, commands.CommandNotFound): #명령어가 존재하지 않는 경우
         # help 명령어가 아닌 경우에만 처리
         if not ctx.message.content.startswith(('/phelp', '/p도움말')):
             await ctx.send(f"존재하지 않는 명령어입니다. 도움말을 보려면 `/phelp`를 입력하세요.")
@@ -190,7 +191,7 @@ async def help_Gemini(ctx):
     await ctx.send(embed=embed)
 
 #====================================[투표 명령어 help 코드]======================================
-@help_command.command(name='투표')
+@help_command.command(name='투표') #/phelp 투표
 async def help_vote(ctx):
     embed = discord.Embed(
         title="📊 투표 명령어 도움말",
@@ -253,7 +254,7 @@ async def help_vote(ctx):
     await ctx.send(embed=embed)
 
 #====================================[보스 명령어 help 코드]======================================
-@help_command.command(name='보스')
+@help_command.command(name='보스') #/phelp 보스
 async def help_boss(ctx):
     embed = discord.Embed(
         title="🗡️ 보스 공략 명령어 도움말",
@@ -314,70 +315,70 @@ async def help_boss(ctx):
     await ctx.send(embed=embed)
 
 #====================================[일정 투표 명령어]======================================
-class DateSelect(Select):
+class DateSelect(Select): #날짜 선택 클래스
     def __init__(self, dates):
-        options = []
+        options = [] #날짜 선택 옵션
         for date in dates:
-            date_obj = datetime.strptime(date, '%Y-%m-%d')
-            weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
-            options.append(
+            date_obj = datetime.strptime(date, '%Y-%m-%d') #날짜 객체
+            weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()] #요일
+            options.append( #날짜 선택 옵션
                 SelectOption(
-                    label=f"{date_obj.month}월 {date_obj.day}일 ({weekday})",
-                    value=date,
-                    description=f"{date_obj.year}년 {date_obj.month}월 {date_obj.day}일"
+                    label=f"{date_obj.month}월 {date_obj.day}일 ({weekday})", #날짜 선택 라벨
+                    value=date, #날짜 선택 값
+                    description=f"{date_obj.year}년 {date_obj.month}월 {date_obj.day}일" #날짜 선택 설명
                 )
             )
         
-        super().__init__(
-            placeholder="날짜를 선택하세요",
-            min_values=1,
-            max_values=1,
+        super().__init__( #날짜 선택 클래스 초기화
+            placeholder="날짜를 선택하세요", #날짜 선택 플레이스홀더
+            min_values=1, #최소 선택 개수
+            max_values=1, #최대 선택 개수
             options=options
         )
-        self.votes = {}
+        self.votes = {} #투표 데이터
 
-    async def callback(self, interaction):
-        user_id = interaction.user.id
-        selected_date = self.values[0]
+    async def callback(self, interaction): #날짜 선택 콜백
+        user_id = interaction.user.id #유저 아이디
+        selected_date = self.values[0] #선택한 날짜
         
-        if user_id in self.votes:
+        if user_id in self.votes: #유저가 이미 투표한 경우
             old_vote = self.votes[user_id]
-            if old_vote == selected_date:
+            if old_vote == selected_date: #이미 선택한 날짜인 경우
                 await interaction.response.send_message("이미 선택한 날짜입니다!", ephemeral=True)
                 return
         
-        self.votes[user_id] = selected_date
+        self.votes[user_id] = selected_date #투표 데이터에 유저 아이디와 선택한 날짜 추가
         
-        await interaction.response.send_message(f"'{selected_date}'에 투표하셨습니다!", ephemeral=True)
+        await interaction.response.send_message(f"'{selected_date}'에 투표하셨습니다!", ephemeral=True) #투표 완료 메시지
         try:
-            date_obj = datetime.strptime(selected_date, '%Y-%m-%d')
-            weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
-            await interaction.user.send(
+            date_obj = datetime.strptime(selected_date, '%Y-%m-%d') #날짜 객체
+            weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()] #요일
+            await interaction.user.send( #투표 알림 메시지
                 f"📊 단일투표 알림\n"
                 f"{interaction.message.embeds[0].title}에서\n"
                 f"{date_obj.month}월 {date_obj.day}일 ({weekday})에 투표하셨습니다!"
             )
-        except discord.Forbidden:
+        except discord.Forbidden: #권한이 없는 경우
             pass
 
-        vote_counts = {}
+        vote_counts = {} #투표 수 데이터
         for date in self.votes.values():
-            vote_counts[date] = vote_counts.get(date, 0) + 1
+            vote_counts[date] = vote_counts.get(date, 0) + 1 #투표 수 데이터에 날짜별 투표 수 추가
         
-        embed = interaction.message.embeds[0]
-        embed.clear_fields()
+        embed = interaction.message.embeds[0] #투표 메시지 객체
+        embed.clear_fields() #투표 메시지 필드 초기화
         
-        total_votes = len(self.votes)
-        max_votes = max(vote_counts.values()) if vote_counts else 0
+        total_votes = len(self.votes) #총 투표 수
+        max_votes = max(vote_counts.values()) if vote_counts else 0 #최대 투표 수
         
-        sorted_dates = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True)
+        sorted_dates = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True) #날짜별 투표 수 정렬
         
-        for date, count in sorted_dates:
-            date_obj = datetime.strptime(date, '%Y-%m-%d')
-            weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
-            percentage = (count / total_votes * 100) if total_votes > 0 else 0
+        for date, count in sorted_dates: #날짜별 투표 수 반복
+            date_obj = datetime.strptime(date, '%Y-%m-%d') #날짜 객체
+            weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()] #요일
+            percentage = (count / total_votes * 100) if total_votes > 0 else 0 #투표 비율
             
-            bar = "🟦" * round(count/max_votes * 10) + "⬜" * (10 - round(count/max_votes * 10))
+            bar = "🟦" * round(count/max_votes * 10) + "⬜" * (10 - round(count/max_votes * 10)) #바 그래프
             
             embed.add_field(
                 name=f"{date_obj.month}월 {date_obj.day}일 ({weekday})",
@@ -385,19 +386,21 @@ class DateSelect(Select):
                 inline=False
             )
         
-        await interaction.message.edit(embed=embed)
-
-class PollView(View): #투표 뷰
+        await interaction.message.edit(embed=embed) #투표 메시지 수정
+#====================================[투표 뷰 클래스]======================================
+class PollView(View): #투표 뷰 
     def __init__(self, dates):
         super().__init__(timeout=None)
-        self.date_select = DateSelect(dates)
-        self.add_item(self.date_select)
+        self.date_select = DateSelect(dates) #날짜 선택 클래스
+        self.add_item(self.date_select) #날짜 선택 아이템 추가
 
+#====================================[일정 투표 명령어]======================================
 class Schedule(commands.Cog): #일정 투표 명령어
     def __init__(self, bot):
         self.bot = bot
         self.active_polls = {}
 
+#====================================[단일 투표 명령어]======================================
     @commands.command(name='단일투표') #단일 투표 명령어
     async def create_poll(self, ctx, title=None, *dates):
         if title is None:
@@ -425,10 +428,11 @@ class Schedule(commands.Cog): #일정 투표 명령어
             color=discord.Color.blue()
         )
 
-        view = PollView(dates)
+        view = PollView(dates) 
         message = await ctx.send(embed=embed, view=view)
         self.active_polls[message.id] = view.date_select
 
+#====================================[투표 종료 명령어]======================================
     @commands.command(name='투표종료')
     async def end_poll(self, ctx, *, title=None):
         try:
@@ -437,46 +441,46 @@ class Schedule(commands.Cog): #일정 투표 명령어
                 return
 
             found_polls = []
-            async for message in ctx.channel.history(limit=100):
-                if message.embeds and message.id in self.active_polls:
-                    message_title = message.embeds[0].title.replace("📅 ", "").strip()
-                    if message_title == title:
-                        date_select = self.active_polls.get(message.id)
-                        if not date_select:
+            async for message in ctx.channel.history(limit=100): #투표 메시지 반복  
+                if message.embeds and message.id in self.active_polls: #투표 메시지가 있고 투표 데이터에 있는 경우
+                    message_title = message.embeds[0].title.replace("📅 ", "").strip() #투표 메시지 제목
+                    if message_title == title: #투표 메시지 제목이 일치하는 경우
+                        date_select = self.active_polls.get(message.id) #투표 데이터
+                        if not date_select: #투표 데이터가 없는 경우
                             continue
-                        poll_type = "중복" if isinstance(date_select, MultiDateSelect) else "단일"
+                        poll_type = "중복" if isinstance(date_select, MultiDateSelect) else "단일" #투표 유형
                         found_polls.append((message, poll_type))
 
-            if not found_polls:
+            if not found_polls: #투표 데이터가 없는 경우
                 await ctx.send(f"'{title}' 제목의 진행 중인 투표를 찾을 수 없습니다.")
                 return
 
-            if len(found_polls) > 1:
+            if len(found_polls) > 1: #투표 데이터가 여러 개인 경우
                 select_embed = discord.Embed(
-                    title=f"📊 '{title}' 투표 선택",
-                    description="종료하려는 투표의 번호를 입력해주세요. (예: 1)",
+                    title=f"📊 '{title}' 투표 선택", #투표 메시지 제목
+                    description="종료하려는 투표의 번호를 입력해주세요. (예: 1)", #투표 메시지 설명
                     color=discord.Color.blue()
                 )
                 
-                for i, (msg, poll_type) in enumerate(found_polls, 1):
-                    vote_count = len(self.active_polls[msg.id].votes)
+                for i, (msg, poll_type) in enumerate(found_polls, 1): #투표 데이터 반복
+                    vote_count = len(self.active_polls[msg.id].votes) #투표 수  
                     select_embed.add_field(
-                        name=f"{i}. {title} ({poll_type}투표)",
-                        value=f"현재 {vote_count}명 참여 중",
+                        name=f"{i}. {title} ({poll_type}투표)", #투표 메시지 필드
+                        value=f"현재 {vote_count}명 참여 중", #투표 메시지 필드 값
                         inline=False
                     )
                 
-                await ctx.send(embed=select_embed)
+                await ctx.send(embed=select_embed) #투표 메시지 전송
                 
-                def check(m):
-                    return m.author == ctx.author and m.channel == ctx.channel and m.content.isdigit()
+                def check(m): #투표 메시지 체크
+                    return m.author == ctx.author and m.channel == ctx.channel and m.content.isdigit() #메시지 작성자, 채널, 내용이 일치하는 경우
                 
                 try:
                     msg = await self.bot.wait_for('message', check=check, timeout=30.0)
-                    selection = int(msg.content)
-                    if 1 <= selection <= len(found_polls):
-                        message, poll_type = found_polls[selection-1]
-                    else:
+                    selection = int(msg.content) #선택한 번호
+                    if 1 <= selection <= len(found_polls): #선택한 번호가 투표 데이터 범위 내인 경우
+                        message, poll_type = found_polls[selection-1] #투표 데이터
+                    else: #선택한 번호가 투표 데이터 범위 밖인 경우
                         await ctx.send("올바른 번호를 입력해주세요.")
                         return
                 except asyncio.TimeoutError:
@@ -488,24 +492,24 @@ class Schedule(commands.Cog): #일정 투표 명령어
             else:
                 message, poll_type = found_polls[0]
 
-            date_select = self.active_polls.get(message.id)
-            if not date_select:
+            date_select = self.active_polls.get(message.id) #투표 데이터
+            if not date_select: #투표 데이터가 없는 경우
                 await ctx.send("투표 데이터를 찾을 수 없습니다.")
                 return
             
-            if not date_select.votes:
+            if not date_select.votes: #투표가 없는 경우
                 await ctx.send("아직 투표가 없습니다.")
                 return
 
             vote_counts = {}
-            if isinstance(date_select, MultiDateSelect):
-                for user_votes in date_select.votes.values():
-                    for date in user_votes:
-                        vote_counts[date] = vote_counts.get(date, 0) + 1
-                total_votes = sum(vote_counts.values())
-            else:
-                for date in date_select.votes.values():
-                    vote_counts[date] = vote_counts.get(date, 0) + 1
+            if isinstance(date_select, MultiDateSelect): #중복 투표인 경우
+                for user_votes in date_select.votes.values(): #투표 수 반복
+                    for date in user_votes: #날짜 반복
+                        vote_counts[date] = vote_counts.get(date, 0) + 1 #투표 수 데이터에 날짜별 투표 수 추가
+                total_votes = sum(vote_counts.values()) #총 투표 수
+            else: #단일 투표인 경우
+                for date in date_select.votes.values(): #날짜 반복
+                    vote_counts[date] = vote_counts.get(date, 0) + 1 #투표 수 데이터에 날짜별 투표 수 추가
                 total_votes = len(date_select.votes)
 
             result_embed = discord.Embed(
@@ -514,16 +518,16 @@ class Schedule(commands.Cog): #일정 투표 명령어
                 color=discord.Color.green()
             )
 
-            sorted_results = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True)
-            if sorted_results:
+            sorted_results = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True) #날짜별 투표 수 정렬
+            if sorted_results: #날짜별 투표 수가 있는 경우
                 max_votes = sorted_results[0][1]
 
-                for date, count in sorted_results:
-                    date_obj = datetime.strptime(date, '%Y-%m-%d')
-                    weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
-                    percentage = (count / total_votes * 100)
+                for date, count in sorted_results: #날짜별 투표 수 반복
+                    date_obj = datetime.strptime(date, '%Y-%m-%d') #날짜 객체
+                    weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()] #요일
+                    percentage = (count / total_votes * 100) #투표 비율
                     
-                    bar = "🟦" * round(count/max_votes * 10) + "⬜" * (10 - round(count/max_votes * 10))
+                    bar = "🟦" * round(count/max_votes * 10) + "⬜" * (10 - round(count/max_votes * 10)) #바 그래프
                     
                     result_embed.add_field(
                         name=f"{date_obj.month}월 {date_obj.day}일 ({weekday})",
@@ -531,41 +535,41 @@ class Schedule(commands.Cog): #일정 투표 명령어
                         inline=False
                     )
 
-                winners = [date for date, votes in sorted_results if votes == max_votes]
-                if len(winners) == 1:
-                    date_obj = datetime.strptime(winners[0], '%Y-%m-%d')
+                winners = [date for date, votes in sorted_results if votes == max_votes] #최다 선택된 날짜
+                if len(winners) == 1: #최다 선택된 날짜가 하나인 경우
+                    date_obj = datetime.strptime(winners[0], '%Y-%m-%d') #날짜 객체
                     weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
                     result_embed.set_footer(text=f"✨ 최다 선택된 날짜: {date_obj.month}월 {date_obj.day}일 ({weekday})")
-                else:
+                else: #최다 선택된 날짜가 여러 개인 경우
                     winner_texts = []
-                    for date in winners:
-                        date_obj = datetime.strptime(date, '%Y-%m-%d')
-                        weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
-                        winner_texts.append(f"{date_obj.month}월 {date_obj.day}일 ({weekday})")
-                    result_embed.set_footer(text=f"✨ 최다 선택된 날짜들: {', '.join(winner_texts)}")
+                    for date in winners: #최다 선택된 날짜 반복
+                        date_obj = datetime.strptime(date, '%Y-%m-%d') #날짜 객체
+                        weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()] #요일
+                        winner_texts.append(f"{date_obj.month}월 {date_obj.day}일 ({weekday})") #최다 선택된 날짜 텍스트
+                    result_embed.set_footer(text=f"✨ 최다 선택된 날짜들: {', '.join(winner_texts)}") #투표 결과 푸터
 
             voters = set()
-            if isinstance(date_select, MultiDateSelect):
-                voters = set(date_select.votes.keys())
-            else:
-                voters = set(date_select.votes.keys())
+            if isinstance(date_select, MultiDateSelect): #중복 투표인 경우
+                voters = set(date_select.votes.keys()) #투표 수 데이터 키 추가
+            else: #단일 투표인 경우
+                voters = set(date_select.votes.keys()) #투표 수 데이터 키 추가
 
-            if voters:
+            if voters: #투표 수가 있는 경우
                 date_voters = {}
-                if isinstance(date_select, MultiDateSelect):
-                    for user_id, dates in date_select.votes.items():
-                        for date in dates:
-                            if date not in date_voters:
-                                date_voters[date] = []
-                            date_voters[date].append(user_id)
-                else:
-                    for user_id, date in date_select.votes.items():
-                        if date not in date_voters:
-                            date_voters[date] = []
-                        date_voters[date].append(user_id)
+                if isinstance(date_select, MultiDateSelect): #중복 투표인 경우  
+                    for user_id, dates in date_select.votes.items(): #투표 수 데이터 반복
+                        for date in dates: #날짜 반복
+                            if date not in date_voters: #날짜가 없는 경우   
+                                date_voters[date] = [] #날짜 추가
+                            date_voters[date].append(user_id) #날짜 추가
+                else: #단일 투표인 경우
+                    for user_id, date in date_select.votes.items(): #투표 수 데이터 반복
+                        if date not in date_voters: #날짜가 없는 경우
+                            date_voters[date] = [] #날짜 추가
+                        date_voters[date].append(user_id) #날짜 추가
                 
                 result_embed.add_field(
-                    name="📢 날짜별 투표 참여자",
+                    name="📢 날짜별 투표 참여자", #투표 결과 필드
                     value="\n".join(
                         f"{date_obj.month}월 {date_obj.day}일 ({weekday}): " + 
                         " ".join(f"<@{user_id}>" for user_id in date_voters.get(date, []))
@@ -578,42 +582,42 @@ class Schedule(commands.Cog): #일정 투표 명령어
                     inline=False
                 )
 
-            await ctx.send(embed=result_embed)
+            await ctx.send(embed=result_embed) #투표 결과 메시지 전송
 
-            new_embed = message.embeds[0]
-            new_embed.description = "🔒 투표가 종료되었습니다."
-            await message.edit(embed=new_embed, view=None)
+            new_embed = message.embeds[0] #투표 메시지 객체
+            new_embed.description = "🔒 투표가 종료되었습니다." #투표 메시지 설명
+            await message.edit(embed=new_embed, view=None) #투표 메시지 수정
             
-            del self.active_polls[message.id]
+            del self.active_polls[message.id] #투표 데이터 삭제
 
-        except discord.NotFound:
+        except discord.NotFound: #투표 메시지를 찾을 수 없는 경우
             await ctx.send("메시지를 찾을 수 없습니다.")
-        except discord.Forbidden:
+        except discord.Forbidden: #투표 메시지를 수정할 권한이 없는 경우    
             await ctx.send("메시지를 수정할 권한이 없습니다.")
-        except Exception as e:
+        except Exception as e: #오류가 발생한 경우
             await ctx.send(f"오류가 발생했습니다: {e}")
             print(f"Error in end_poll: {e}")
-
-    @commands.command(name='투표목록')
+#====================================[투표 목록 명령어]======================================
+    @commands.command(name='투표목록') #투표 목록 명령어
     async def list_polls(self, ctx):
-        if not self.active_polls:
+        if not self.active_polls: #투표 데이터가 없는 경우
             await ctx.send("진행 중인 투표가 없습니다.")
             return
 
         try:
-            messages = {msg.id: msg async for msg in ctx.channel.history(limit=100)}
+            messages = {msg.id: msg async for msg in ctx.channel.history(limit=100)} #투표 메시지 반복
             
-            to_remove = [msg_id for msg_id in self.active_polls if msg_id not in messages]
+            to_remove = [msg_id for msg_id in self.active_polls if msg_id not in messages] #투표 데이터 삭제
             for msg_id in to_remove:
                 del self.active_polls[msg_id]
 
-            if not self.active_polls:
+            if not self.active_polls: #투표 데이터가 없는 경우
                 await ctx.send("진행 중인 투표가 없습니다.")
                 return
 
             embed = discord.Embed(
-                title="📋 진행 중 투표 목록",
-                description="투표를 종료하려면 `/투표종료 [제목]을 입력하세요.",
+                title="📋 진행 중 투표 목록", #투표 목록 제목
+                description="투표를 종료하려면 `/투표종료 [제목]을 입력하세요.", #투표 목록 설명
                 color=discord.Color.blue()
             )
 
@@ -621,20 +625,21 @@ class Schedule(commands.Cog): #일정 투표 명령어
                 if msg_id in messages:
                     message = messages[msg_id]
                     if message.embeds:
-                        title = message.embeds[0].title.replace("📅 ", "")
-                        vote_count = len(date_select.votes)
-                        poll_type = "중복" if isinstance(date_select, MultiDateSelect) else "단일"
+                        title = message.embeds[0].title.replace("📅 ", "") #투표 메시지 제목
+                        vote_count = len(date_select.votes) #투표 수
+                        poll_type = "중복" if isinstance(date_select, MultiDateSelect) else "단일" #투표 유형
                         embed.add_field(
                             name=f"📊 {title}",
                             value=f"현재 {vote_count}명 참여 중 ({poll_type}투표)",
                             inline=False
                         )
 
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed) #투표 목록 메시지 전송
 
         except Exception as e:
             await ctx.send(f"투표 목록을 가져오는 중 오류가 발생했습니다: {e}")
 
+#====================================[중복 투표 명령어]======================================
     @commands.command(name='중복투표')
     async def create_multi_poll(self, ctx, title=None, *dates):
         if title is None:
@@ -662,75 +667,76 @@ class Schedule(commands.Cog): #일정 투표 명령어
             color=discord.Color.blue()
         )
 
-        view = MultiPollView(dates)
-        message = await ctx.send(embed=embed, view=view)
-        self.active_polls[message.id] = view.date_select
+        view = MultiPollView(dates) #중복 투표 뷰
+        message = await ctx.send(embed=embed, view=view) #투표 메시지 전송
+        self.active_polls[message.id] = view.date_select #투표 데이터 추가
 
-class MultiDateSelect(Select):
+#====================================[중복 투표 드롭다운 메뉴]======================================
+class MultiDateSelect(Select): #중복 투표 드롭다운 메뉴
     def __init__(self, dates):
         options = []
         for date in dates:
-            date_obj = datetime.strptime(date, '%Y-%m-%d')
-            weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
+            date_obj = datetime.strptime(date, '%Y-%m-%d') #날짜 객체
+            weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()] #요일
             options.append(
                 SelectOption(
-                    label=f"{date_obj.month}월 {date_obj.day}일 ({weekday})",
-                    value=date,
-                    description=f"{date_obj.year}년 {date_obj.month}월 {date_obj.day}일"
+                    label=f"{date_obj.month}월 {date_obj.day}일 ({weekday})", #드롭다운 메뉴 옵션
+                    value=date, #드롭다운 메뉴 옵션 값
+                    description=f"{date_obj.year}년 {date_obj.month}월 {date_obj.day}일" #드롭다운 메뉴 옵션 설명
                 )
             )
         
         super().__init__(
-            placeholder="날짜를 선택하세요 (여러 개 선택 가능)",
-            min_values=1,
-            max_values=len(dates),
-            options=options
+            placeholder="날짜를 선택하세요 (여러 개 선택 가능)", #드롭다운 메뉴 설명
+            min_values=1, #최소 선택 가능 수
+            max_values=len(dates), #최대 선택 가능 수
+            options=options #드롭다운 메뉴 옵션
         )
         self.votes = {}
 
-    async def callback(self, interaction):
-        user_id = interaction.user.id
-        selected_dates = self.values
+    async def callback(self, interaction): #드롭다운 메뉴 콜백
+        user_id = interaction.user.id #유저 아이디
+        selected_dates = self.values #선택한 날짜
         
-        if user_id in self.votes and set(self.votes[user_id]) == set(selected_dates):
+        if user_id in self.votes and set(self.votes[user_id]) == set(selected_dates): #이미 동일한 날짜들을 선택한 경우
             await interaction.response.send_message("이미 동일한 날짜들을 선택하셨습니다!", ephemeral=True)
             return
         
-        self.votes[user_id] = selected_dates
+        self.votes[user_id] = selected_dates #선택한 날짜 추가
         
-        await interaction.response.send_message(
+        await interaction.response.send_message( #선택한 날짜 알림
             f"선택한 날짜: {', '.join(selected_dates)}에 투표하셨습니다!", 
             ephemeral=True
         )
         
         try:
-            dm_message = f"📊 중복투표 알림\n{interaction.message.embeds[0].title}에서\n선택하신 날짜:\n"
+            dm_message = f"📊 중복투표 알림\n{interaction.message.embeds[0].title}에서\n선택하신 날짜:\n" #중복 투표 알림 메시지
             for date in selected_dates:
-                date_obj = datetime.strptime(date, '%Y-%m-%d')
+                date_obj = datetime.strptime(date, '%Y-%m-%d') #날짜 객체
                 weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
                 dm_message += f"• {date_obj.month}월 {date_obj.day}일 ({weekday})\n"
             
-            await interaction.user.send(dm_message)
-        except discord.Forbidden:
+            await interaction.user.send(dm_message) #중복 투표 알림 메시지 전송
+        except discord.Forbidden: #중복 투표 알림 메시지 전송 권한이 없는 경우
             pass
         
         vote_counts = {}
-        for user_votes in self.votes.values():
-            for date in user_votes:
-                vote_counts[date] = vote_counts.get(date, 0) + 1
+        for user_votes in self.votes.values(): #투표 수 데이터 반복
+            for date in user_votes: #날짜 반복
+                vote_counts[date] = vote_counts.get(date, 0) + 1 #투표 수 추가
         
         embed = interaction.message.embeds[0]
         embed.clear_fields()
         
-        total_votes = sum(vote_counts.values())
-        max_votes = max(vote_counts.values()) if vote_counts else 0
+        total_votes = sum(vote_counts.values()) #총 투표 수
+        max_votes = max(vote_counts.values()) if vote_counts else 0 #최대 투표 수
         
-        sorted_dates = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True)
+        sorted_dates = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True) #투표 수 정렬
         
         for date, count in sorted_dates:
-            date_obj = datetime.strptime(date, '%Y-%m-%d')
-            weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
-            percentage = (count / total_votes * 100)
+            date_obj = datetime.strptime(date, '%Y-%m-%d') #날짜 객체
+            weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()] #요일
+            percentage = (count / total_votes * 100) #투표 비율
             
             bar = "🟦" * round(count/max_votes * 10) + "⬜" * (10 - round(count/max_votes * 10))
             
@@ -743,18 +749,18 @@ class MultiDateSelect(Select):
         await interaction.message.edit(embed=embed)
 
 #====================================[중복 투표 명령어]======================================
-class MultiPollView(View):
+class MultiPollView(View): #중복 투표 뷰
     def __init__(self, dates):
-        super().__init__(timeout=None)
-        self.date_select = MultiDateSelect(dates)
-        self.add_item(self.date_select)
+        super().__init__(timeout=None) #뷰 타임아웃 설정
+        self.date_select = MultiDateSelect(dates) #중복 투표 드롭다운 메뉴
+        self.add_item(self.date_select) #중복 투표 드롭다운 메뉴 추가
 
 #====================================[보스 공략 명령어]======================================
-class BossStrategy(commands.Cog):
+class BossStrategy(commands.Cog): #보스 공략 명령어
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(name='보스', aliases=['boss', 'b'])
+    @commands.group(name='보스', aliases=['boss', 'b']) #보스 공략 명령어
     async def boss(self, ctx):
         """보스 공략 명령어"""
         if ctx.invoked_subcommand is None:  # 하위 명령어가 없는 경우
@@ -857,7 +863,7 @@ class BossStrategy(commands.Cog):
             await ctx.send(embed=embed)
             return
 
-        if difficulty.lower() not in ['노말', '하드']:
+        if difficulty.lower() not in ['노말', '하드']: #올바른 난이도가 아닌 경우
             await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
             return
 
@@ -868,12 +874,12 @@ class BossStrategy(commands.Cog):
         )
         
         # 난이도별 이미지 경로 설정
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
+        difficulty_path = 'normal' if difficulty=='노말' else 'hard' #난이도별 이미지 경로
         files = [
-            discord.File(f"images/legion/valtan/{difficulty_path}/1gate.png", filename="valtan1.png"),
+            discord.File(f"images/legion/valtan/{difficulty_path}/1gate.png", filename="valtan1.png"), #이미지 파일
         ]
         
-        embed.set_image(url="attachment://valtan1.png")
+        embed.set_image(url="attachment://valtan1.png") #이미지 표시
         await ctx.send(file=files[0], embed=embed)
 
     @boss.command(name='비아키스')
@@ -999,7 +1005,7 @@ class BossStrategy(commands.Cog):
             discord.File(f"images/legion/abrelshud/{difficulty_path}/2gate.png", filename="abrel2.png"),
          ]
         
-        embed.set_image(url="attachment://abrel1.png")
+        embed.set_image(url="attachment://abrel1.png") #이미지 표시
         embeds = [embed]
         
         for i in range(1, len(files)):
@@ -1007,7 +1013,7 @@ class BossStrategy(commands.Cog):
                 title=f"{i+1}관문 공략",
                 color=discord.Color.dark_red()
             )
-            gate_embed.set_image(url=f"attachment://abrel{i+1}.png")
+            gate_embed.set_image(url=f"attachment://abrel{i+1}.png") #이미지 표시
             embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
@@ -1153,7 +1159,7 @@ class BossStrategy(commands.Cog):
         embed.set_image(url="attachment://behimos1.png")
         embeds = [embed]
         
-        for i in range(1, len(files)):
+        for i in range(1, len(files)): #페이즈별 이미지 표시
             phase_embed = discord.Embed(
                 title=f"{i+1}페이즈 공략",
                 color=discord.Color.blue()

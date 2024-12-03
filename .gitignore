@@ -1,0 +1,14 @@
+# 환경 변수 파일
+.env
+.env.local
+.env.*.local
+
+# SSH 키
+.ssh/
+*.pem
+id_rsa
+id_rsa.pub
+
+# 기타 민감한 정보
+*.key
+*.cert

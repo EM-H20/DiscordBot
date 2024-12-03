@@ -322,33 +322,33 @@ class DateSelect(Select):
             weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
             options.append(
                 SelectOption(
-                    label=f"{date_obj.month}월 {date_obj.day}일 ({weekday})",
+                    label=f"{date_obj.month}월 {date_obj.day}일 ({weekday})", # 날짜 표시
                     value=date,
                     description=f"{date_obj.year}년 {date_obj.month}월 {date_obj.day}일"
                 )
             )
         
         super().__init__(
-            placeholder="날짜를 선택하세요",
-            min_values=1,
-            max_values=1,
+            placeholder="날짜를 선택하세요", # 날짜 선택 표시
+            min_values=1, # 최소 날짜 선택 개수
+            max_values=1, # 최대 날짜 선택 개수
             options=options
         )
-        self.votes = {}
+        self.votes = {} # 투표 데이터
 
-    async def callback(self, interaction):
-        user_id = interaction.user.id
-        selected_date = self.values[0]
+    async def callback(self, interaction): # 투표 콜백 함수
+        user_id = interaction.user.id # 유저 아이디
+        selected_date = self.values[0] # 선택한 날짜
         
-        if user_id in self.votes:
-            old_vote = self.votes[user_id]
-            if old_vote == selected_date:
+        if user_id in self.votes: # 이전 투표 날짜 존재 여부
+            old_vote = self.votes[user_id] # 이전 투표 날짜
+            if old_vote == selected_date: # 이전 투표 날짜와 동일한 경우
                 await interaction.response.send_message("이미 선택한 날짜입니다!", ephemeral=True)
                 return
         
-        self.votes[user_id] = selected_date
+        self.votes[user_id] = selected_date # 투표 데이터 저장
         
-        await interaction.response.send_message(f"'{selected_date}'에 투표하셨습니다!", ephemeral=True)
+        await interaction.response.send_message(f"'{selected_date}'에 투표하셨습니다!", ephemeral=True) # 투표 완료 메시지
         try:
             date_obj = datetime.strptime(selected_date, '%Y-%m-%d')
             weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
@@ -360,24 +360,24 @@ class DateSelect(Select):
         except discord.Forbidden:
             pass
 
-        vote_counts = {}
+        vote_counts = {} # 투표 데이터
         for date in self.votes.values():
-            vote_counts[date] = vote_counts.get(date, 0) + 1
+            vote_counts[date] = vote_counts.get(date, 0) + 1 # 투표 데이터 저장
         
-        embed = interaction.message.embeds[0]
+        embed = interaction.message.embeds[0] # 투표 데이터
         embed.clear_fields()
         
-        total_votes = len(self.votes)
-        max_votes = max(vote_counts.values()) if vote_counts else 0
+        total_votes = len(self.votes) # 총 투표 수
+        max_votes = max(vote_counts.values()) if vote_counts else 0 # 최대 투표 수
         
-        sorted_dates = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True)
+        sorted_dates = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True) # 정렬
         
         for date, count in sorted_dates:
             date_obj = datetime.strptime(date, '%Y-%m-%d')
             weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
             percentage = (count / total_votes * 100) if total_votes > 0 else 0
             
-            bar = "🟦" * round(count/max_votes * 10) + "⬜" * (10 - round(count/max_votes * 10))
+            bar = "🟦" * round(count/max_votes * 10) + "⬜" * (10 - round(count/max_votes * 10)) # 바 표시
             
             embed.add_field(
                 name=f"{date_obj.month}월 {date_obj.day}일 ({weekday})",
@@ -385,22 +385,22 @@ class DateSelect(Select):
                 inline=False
             )
         
-        await interaction.message.edit(embed=embed)
+        await interaction.message.edit(embed=embed) # 투표 데이터 수정
 
 class PollView(View): #투표 뷰
     def __init__(self, dates):
-        super().__init__(timeout=None)
-        self.date_select = DateSelect(dates)
-        self.add_item(self.date_select)
+        super().__init__(timeout=None) # 타임아웃 없음
+        self.date_select = DateSelect(dates) # 날짜 선택
+        self.add_item(self.date_select) # 날짜 선택 아이템 추가
 
 class Schedule(commands.Cog): #일정 투표 명령어
     def __init__(self, bot):
         self.bot = bot
-        self.active_polls = {}
+        self.active_polls = {} # 투표 데이터
 
     @commands.command(name='단일투표') #단일 투표 명령어
     async def create_poll(self, ctx, title=None, *dates):
-        if title is None:
+        if title is None: # 투표 제목 없는 경우
             await ctx.send("투표 제목을 입력해주세요!")
             return
 
@@ -414,7 +414,7 @@ class Schedule(commands.Cog): #일정 투표 명령어
 
         try:
             for date in dates:
-                datetime.strptime(date, '%Y-%m-%d')
+                datetime.strptime(date, '%Y-%m-%d') # 날짜 형식 올바른지 확인
         except ValueError:
             await ctx.send("날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식으로 입력해주세요.")
             return
@@ -425,33 +425,33 @@ class Schedule(commands.Cog): #일정 투표 명령어
             color=discord.Color.blue()
         )
 
-        view = PollView(dates)
-        message = await ctx.send(embed=embed, view=view)
-        self.active_polls[message.id] = view.date_select
+        view = PollView(dates) # 투표 뷰
+        message = await ctx.send(embed=embed, view=view) # 투표 메시지
+        self.active_polls[message.id] = view.date_select # 투표 데이터 저장
 
-    @commands.command(name='투표종료')
+    @commands.command(name='투표종료') # 투표 종료 명령어
     async def end_poll(self, ctx, *, title=None):
         try:
-            if title is None:
+            if title is None: # 투표 제목 없는 경우
                 await ctx.send("투표 제목을 입력해주세요! 투표 목록을 보려면 `/투표목록`을 입력하세요.")
                 return
 
             found_polls = []
-            async for message in ctx.channel.history(limit=100):
-                if message.embeds and message.id in self.active_polls:
-                    message_title = message.embeds[0].title.replace("📅 ", "").strip()
+            async for message in ctx.channel.history(limit=100): # 투표 메시지 존재 여부
+                if message.embeds and message.id in self.active_polls: # 투표 데이터 존재 여부
+                    message_title = message.embeds[0].title.replace("📅 ", "").strip() # 투표 제목
                     if message_title == title:
-                        date_select = self.active_polls.get(message.id)
+                        date_select = self.active_polls.get(message.id) # 투표 데이터
                         if not date_select:
                             continue
-                        poll_type = "중복" if isinstance(date_select, MultiDateSelect) else "단일"
+                        poll_type = "중복" if isinstance(date_select, MultiDateSelect) else "단일" # 투표 타입
                         found_polls.append((message, poll_type))
 
-            if not found_polls:
+            if not found_polls: # 투표 데이터 없는 경우
                 await ctx.send(f"'{title}' 제목의 진행 중인 투표를 찾을 수 없습니다.")
                 return
 
-            if len(found_polls) > 1:
+            if len(found_polls) > 1: # 여러 개의 투표 데이터 존재 여부
                 select_embed = discord.Embed(
                     title=f"📊 '{title}' 투표 선택",
                     description="종료하려는 투표의 번호를 입력해주세요. (예: 1)",
@@ -459,7 +459,7 @@ class Schedule(commands.Cog): #일정 투표 명령어
                 )
                 
                 for i, (msg, poll_type) in enumerate(found_polls, 1):
-                    vote_count = len(self.active_polls[msg.id].votes)
+                    vote_count = len(self.active_polls[msg.id].votes) # 투표 수
                     select_embed.add_field(
                         name=f"{i}. {title} ({poll_type}투표)",
                         value=f"현재 {vote_count}명 참여 중",
@@ -469,44 +469,44 @@ class Schedule(commands.Cog): #일정 투표 명령어
                 await ctx.send(embed=select_embed)
                 
                 def check(m):
-                    return m.author == ctx.author and m.channel == ctx.channel and m.content.isdigit()
+                    return m.author == ctx.author and m.channel == ctx.channel and m.content.isdigit() # 메시지 체크
                 
                 try:
-                    msg = await self.bot.wait_for('message', check=check, timeout=30.0)
-                    selection = int(msg.content)
-                    if 1 <= selection <= len(found_polls):
-                        message, poll_type = found_polls[selection-1]
+                    msg = await self.bot.wait_for('message', check=check, timeout=30.0) # 메시지 대기
+                    selection = int(msg.content) # 선택한 번호
+                    if 1 <= selection <= len(found_polls): # 번호 범위 체크
+                        message, poll_type = found_polls[selection-1] # 투표 데이터
                     else:
                         await ctx.send("올바른 번호를 입력해주세요.")
                         return
-                except asyncio.TimeoutError:
+                except asyncio.TimeoutError: # 시간 초과 체크
                     await ctx.send("시간이 초과되었습니다. 다시 시도해주세요.")
                     return
-                except ValueError:
+                except ValueError: # 숫자 체크
                     await ctx.send("올바른 번호를 입력해주세요.")
                     return
             else:
-                message, poll_type = found_polls[0]
+                message, poll_type = found_polls[0] # 투표 데이터
 
-            date_select = self.active_polls.get(message.id)
-            if not date_select:
+            date_select = self.active_polls.get(message.id) # 투표 데이터
+            if not date_select: # 투표 데이터 없는 경우
                 await ctx.send("투표 데이터를 찾을 수 없습니다.")
                 return
             
-            if not date_select.votes:
+            if not date_select.votes: # 투표 없는 경우
                 await ctx.send("아직 투표가 없습니다.")
                 return
 
-            vote_counts = {}
-            if isinstance(date_select, MultiDateSelect):
+            vote_counts = {} # 투표 데이터
+            if isinstance(date_select, MultiDateSelect): # 중복 투표 여부
                 for user_votes in date_select.votes.values():
                     for date in user_votes:
-                        vote_counts[date] = vote_counts.get(date, 0) + 1
-                total_votes = sum(vote_counts.values())
+                        vote_counts[date] = vote_counts.get(date, 0) + 1 # 투표 데이터 저장
+                total_votes = sum(vote_counts.values()) # 총 투표 수
             else:
                 for date in date_select.votes.values():
-                    vote_counts[date] = vote_counts.get(date, 0) + 1
-                total_votes = len(date_select.votes)
+                    vote_counts[date] = vote_counts.get(date, 0) + 1 # 투표 데이터 저장
+                total_votes = len(date_select.votes) # 총 투표 수
 
             result_embed = discord.Embed(
                 title=f"📊 투표 결과: {title}",
@@ -515,15 +515,15 @@ class Schedule(commands.Cog): #일정 투표 명령어
             )
 
             sorted_results = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True)
-            if sorted_results:
-                max_votes = sorted_results[0][1]
+            if sorted_results: # 투표 데이터 존재 여부
+                max_votes = sorted_results[0][1] # 최대 투표 수
 
                 for date, count in sorted_results:
-                    date_obj = datetime.strptime(date, '%Y-%m-%d')
-                    weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
-                    percentage = (count / total_votes * 100)
+                    date_obj = datetime.strptime(date, '%Y-%m-%d') # 날짜 형식 올바른지 확인
+                    weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()] # 요일 확인
+                    percentage = (count / total_votes * 100) # 투표 비율
                     
-                    bar = "🟦" * round(count/max_votes * 10) + "⬜" * (10 - round(count/max_votes * 10))
+                    bar = "🟦" * round(count/max_votes * 10) + "⬜" * (10 - round(count/max_votes * 10)) # 바 표시
                     
                     result_embed.add_field(
                         name=f"{date_obj.month}월 {date_obj.day}일 ({weekday})",
@@ -531,35 +531,35 @@ class Schedule(commands.Cog): #일정 투표 명령어
                         inline=False
                     )
 
-                winners = [date for date, votes in sorted_results if votes == max_votes]
-                if len(winners) == 1:
-                    date_obj = datetime.strptime(winners[0], '%Y-%m-%d')
+                winners = [date for date, votes in sorted_results if votes == max_votes] # 최다 선택된 날짜
+                if len(winners) == 1: # 최다 선택된 날짜 1개인 경우
+                    date_obj = datetime.strptime(winners[0], '%Y-%m-%d') # 날짜 형식 올바른지 확인
                     weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
                     result_embed.set_footer(text=f"✨ 최다 선택된 날짜: {date_obj.month}월 {date_obj.day}일 ({weekday})")
-                else:
+                else: # 최다 선택된 날짜 여러 개인 경우
                     winner_texts = []
                     for date in winners:
-                        date_obj = datetime.strptime(date, '%Y-%m-%d')
+                        date_obj = datetime.strptime(date, '%Y-%m-%d') # 날짜 형식 올바른지 확인
                         weekday = ['월', '화', '수', '목', '금', '토', '일'][date_obj.weekday()]
                         winner_texts.append(f"{date_obj.month}월 {date_obj.day}일 ({weekday})")
                     result_embed.set_footer(text=f"✨ 최다 선택된 날짜들: {', '.join(winner_texts)}")
 
-            voters = set()
+            voters = set() # 투표자 데이터
             if isinstance(date_select, MultiDateSelect):
                 voters = set(date_select.votes.keys())
             else:
                 voters = set(date_select.votes.keys())
 
-            if voters:
-                date_voters = {}
-                if isinstance(date_select, MultiDateSelect):
-                    for user_id, dates in date_select.votes.items():
+            if voters: # 투표자 데이터 존재 여부
+                date_voters = {} # 날짜별 투표자 데이터
+                if isinstance(date_select, MultiDateSelect): # 중복 투표 여부
+                    for user_id, dates in date_select.votes.items(): # 투표자 데이터
                         for date in dates:
                             if date not in date_voters:
                                 date_voters[date] = []
                             date_voters[date].append(user_id)
                 else:
-                    for user_id, date in date_select.votes.items():
+                    for user_id, date in date_select.votes.items(): # 투표자 데이터
                         if date not in date_voters:
                             date_voters[date] = []
                         date_voters[date].append(user_id)
@@ -578,7 +578,7 @@ class Schedule(commands.Cog): #일정 투표 명령어
                     inline=False
                 )
 
-            await ctx.send(embed=result_embed)
+            await ctx.send(embed=result_embed) # 투표 결과 메시지
 
             new_embed = message.embeds[0]
             new_embed.description = "🔒 투표가 종료되었습니다."
@@ -586,28 +586,28 @@ class Schedule(commands.Cog): #일정 투표 명령어
             
             del self.active_polls[message.id]
 
-        except discord.NotFound:
+        except discord.NotFound: # 메시지 없는 경우
             await ctx.send("메시지를 찾을 수 없습니다.")
-        except discord.Forbidden:
+        except discord.Forbidden: # 권한 없는 경우
             await ctx.send("메시지를 수정할 권한이 없습니다.")
-        except Exception as e:
+        except Exception as e: # 오류 체크
             await ctx.send(f"오류가 발생했습니다: {e}")
             print(f"Error in end_poll: {e}")
 
-    @commands.command(name='투표목록')
+    @commands.command(name='투표목록') # 투표 목록 명령어
     async def list_polls(self, ctx):
-        if not self.active_polls:
+        if not self.active_polls: # 투표 데이터 없는 경우
             await ctx.send("진행 중인 투표가 없습니다.")
             return
 
         try:
-            messages = {msg.id: msg async for msg in ctx.channel.history(limit=100)}
+            messages = {msg.id: msg async for msg in ctx.channel.history(limit=100)} # 투표 메시지
             
-            to_remove = [msg_id for msg_id in self.active_polls if msg_id not in messages]
+            to_remove = [msg_id for msg_id in self.active_polls if msg_id not in messages] # 투표 데이터 삭제
             for msg_id in to_remove:
-                del self.active_polls[msg_id]
+                del self.active_polls[msg_id] # 투표 데이터 삭제
 
-            if not self.active_polls:
+            if not self.active_polls: # 투표 데이터 없는 경우
                 await ctx.send("진행 중인 투표가 없습니다.")
                 return
 
@@ -617,13 +617,13 @@ class Schedule(commands.Cog): #일정 투표 명령어
                 color=discord.Color.blue()
             )
 
-            for msg_id, date_select in self.active_polls.items():
-                if msg_id in messages:
-                    message = messages[msg_id]
-                    if message.embeds:
-                        title = message.embeds[0].title.replace("📅 ", "")
-                        vote_count = len(date_select.votes)
-                        poll_type = "중복" if isinstance(date_select, MultiDateSelect) else "단일"
+            for msg_id, date_select in self.active_polls.items(): # 투표 데이터
+                if msg_id in messages: # 투표 메시지 존재 여부
+                    message = messages[msg_id] # 투표 메시지
+                    if message.embeds: # 투표 데이터 존재 여부
+                        title = message.embeds[0].title.replace("📅 ", "") # 투표 제목
+                        vote_count = len(date_select.votes) # 투표 수
+                        poll_type = "중복" if isinstance(date_select, MultiDateSelect) else "단일" # 투표 타입
                         embed.add_field(
                             name=f"📊 {title}",
                             value=f"현재 {vote_count}명 참여 중 ({poll_type}투표)",
@@ -635,17 +635,17 @@ class Schedule(commands.Cog): #일정 투표 명령어
         except Exception as e:
             await ctx.send(f"투표 목록을 가져오는 중 오류가 발생했습니다: {e}")
 
-    @commands.command(name='중복투표')
+    @commands.command(name='중복투표') # 중복 투표 명령어
     async def create_multi_poll(self, ctx, title=None, *dates):
-        if title is None:
-            await ctx.send("투표 제목을 입력해주세요!")
+        if title is None: # 투표 제목 없는 경우
+            await ctx.send("투표 제목을 입력해주세요!") 
             return
 
-        if len(dates) == 0:
+        if len(dates) == 0: # 날짜 없는 경우
             await ctx.send("날짜를 최소 1개 이상 입력해주세요!")
             return
 
-        if len(dates) > 5:
+        if len(dates) > 5: # 날짜 5개 초과 경우
             await ctx.send("최대 5개까지의 날짜만 선택 가능합니다!")
             return
 
@@ -662,11 +662,11 @@ class Schedule(commands.Cog): #일정 투표 명령어
             color=discord.Color.blue()
         )
 
-        view = MultiPollView(dates)
+        view = MultiPollView(dates) # 중복 투표 명령어
         message = await ctx.send(embed=embed, view=view)
-        self.active_polls[message.id] = view.date_select
+        self.active_polls[message.id] = view.date_select # 투표 데이터 저장
 
-class MultiDateSelect(Select):
+class MultiDateSelect(Select): # 중복 투표 명령어
     def __init__(self, dates):
         options = []
         for date in dates:
@@ -746,7 +746,7 @@ class MultiDateSelect(Select):
 class MultiPollView(View):
     def __init__(self, dates):
         super().__init__(timeout=None)
-        self.date_select = MultiDateSelect(dates)
+        self.date_select = MultiDateSelect(dates) # 중복 투표 명령어
         self.add_item(self.date_select)
 
 #====================================[보스 공략 명령어]======================================

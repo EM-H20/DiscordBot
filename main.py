@@ -1151,21 +1151,21 @@ class BossStrategy(commands.Cog): #보스 공략 명령어
         
         difficulty_path = 'normal' if difficulty=='노말' else 'hard'
         files = [
-            discord.File(f"images/epic/behimos/{difficulty_path}/phase1.png", filename="behimos1.png"),
-            discord.File(f"images/epic/behimos/{difficulty_path}/phase2.png", filename="behimos2.png"),
-            discord.File(f"images/epic/behimos/{difficulty_path}/phase3.png", filename="behimos3.png"),
+            discord.File(f"images/epic/behimos/{difficulty_path}/1gate.png", filename="behimos1.png"),
+            discord.File(f"images/epic/behimos/{difficulty_path}/2gate.png", filename="behimos2.png"),
+            discord.File(f"images/epic/behimos/{difficulty_path}/3gate.png", filename="behimos3.png"),
         ]
         
         embed.set_image(url="attachment://behimos1.png")
         embeds = [embed]
         
-        for i in range(1, len(files)): #페이즈별 이미지 표시
-            phase_embed = discord.Embed(
-                title=f"{i+1}페이즈 공략",
+        for i in range(1, len(files)): #관문별 이미지 표시
+            gate_embed = discord.Embed(
+                title=f"{i+1}관문 공략",
                 color=discord.Color.blue()
             )
-            phase_embed.set_image(url=f"attachment://behimos{i+1}.png")
-            embeds.append(phase_embed)
+            gate_embed.set_image(url=f"attachment://behimos{i+1}.png")
+            embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
 
@@ -1201,21 +1201,21 @@ class BossStrategy(commands.Cog): #보스 공략 명령어
         
         difficulty_path = 'normal' if difficulty=='노말' else 'hard'
         files = [
-            discord.File(f"images/abyss/kayangel/{difficulty_path}/phase1.png", filename="kayangel1.png"),
-            discord.File(f"images/abyss/kayangel/{difficulty_path}/phase2.png", filename="kayangel2.png"),
-            discord.File(f"images/abyss/kayangel/{difficulty_path}/phase3.png", filename="kayangel3.png"),
+            discord.File(f"images/abyss/kayangel/{difficulty_path}/1gate.png", filename="kayangel1.png"),
+            discord.File(f"images/abyss/kayangel/{difficulty_path}/2gate.png", filename="kayangel2.png"),
+            discord.File(f"images/abyss/kayangel/{difficulty_path}/3gate.png", filename="kayangel3.png"),
         ]
         
         embed.set_image(url="attachment://kayangel1.png")
         embeds = [embed]
         
         for i in range(1, len(files)):
-            phase_embed = discord.Embed(
+            gate_embed = discord.Embed(
                 title=f"{i+1}페이즈 공략",
                 color=discord.Color.blue()
             )
-            phase_embed.set_image(url=f"attachment://kayangel{i+1}.png")
-            embeds.append(phase_embed)
+            gate_embed.set_image(url=f"attachment://kayangel{i+1}.png")
+            embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
 
@@ -1251,21 +1251,21 @@ class BossStrategy(commands.Cog): #보스 공략 명령어
         
         difficulty_path = 'normal' if difficulty=='노말' else 'hard'
         files = [
-            discord.File(f"images/abyss/tower/{difficulty_path}/phase1.png", filename="tower1.png"),
-            discord.File(f"images/abyss/tower/{difficulty_path}/phase2.png", filename="tower2.png"),
-            discord.File(f"images/abyss/tower/{difficulty_path}/phase3.png", filename="tower3.png"),
+            discord.File(f"images/abyss/tower/{difficulty_path}/1gate.png", filename="tower1.png"),
+            discord.File(f"images/abyss/tower/{difficulty_path}/2gate.png", filename="tower2.png"),
+            discord.File(f"images/abyss/tower/{difficulty_path}/3gate.png", filename="tower3.png"),
         ]
         
         embed.set_image(url="attachment://tower1.png")
         embeds = [embed]
         
         for i in range(1, len(files)):
-            phase_embed = discord.Embed(
-                title=f"{i+1}페이즈 공략",
+            gate_embed = discord.Embed(
+                title=f"{i+1}관문 공략",
                 color=discord.Color.light_grey()
             )
-            phase_embed.set_image(url=f"attachment://tower{i+1}.png")
-            embeds.append(phase_embed)
+            gate_embed.set_image(url=f"attachment://tower{i+1}.png")
+            embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
 
@@ -1301,21 +1301,21 @@ class BossStrategy(commands.Cog): #보스 공략 명령어
         
         difficulty_path = 'normal' if difficulty=='노말' else 'hard'
         files = [
-            discord.File(f"images/kazeros/ekidna/{difficulty_path}/phase1.png", filename="ekidna1.png"),
-            discord.File(f"images/kazeros/ekidna/{difficulty_path}/phase2.png", filename="ekidna2.png"),
-            discord.File(f"images/kazeros/ekidna/{difficulty_path}/phase3.png", filename="ekidna3.png"),
+            discord.File(f"images/kazeros/ekidna/{difficulty_path}/1gate.png", filename="ekidna1.png"),
+            discord.File(f"images/kazeros/ekidna/{difficulty_path}/2gate.png", filename="ekidna2.png"),
+            discord.File(f"images/kazeros/ekidna/{difficulty_path}/3gate.png", filename="ekidna3.png"),
         ]
         
         embed.set_image(url="attachment://ekidna1.png")
         embeds = [embed]
         
         for i in range(1, len(files)):
-            phase_embed = discord.Embed(
-                title=f"{i+1}페이즈 공략",
+            gate_embed = discord.Embed(
+                title=f"{i+1}관문 공략",
                 color=discord.Color.green()
             )
-            phase_embed.set_image(url=f"attachment://ekidna{i+1}.png")
-            embeds.append(phase_embed)
+            gate_embed.set_image(url=f"attachment://ekidna{i+1}.png")
+            embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
 
@@ -1351,26 +1351,26 @@ class BossStrategy(commands.Cog): #보스 공략 명령어
         
         difficulty_path = 'normal' if difficulty=='노말' else 'hard'
         files = [
-            discord.File(f"images/kazeros/aegir/{difficulty_path}/phase1.png", filename="aegir1.png"),
-            discord.File(f"images/kazeros/aegir/{difficulty_path}/phase2.png", filename="aegir2.png"),
-            discord.File(f"images/kazeros/aegir/{difficulty_path}/phase3.png", filename="aegir3.png"),
+            discord.File(f"images/kazeros/aegir/{difficulty_path}/1gate.png", filename="aegir1.png"),
+            discord.File(f"images/kazeros/aegir/{difficulty_path}/2gate.png", filename="aegir2.png"),
+            discord.File(f"images/kazeros/aegir/{difficulty_path}/3gate.png", filename="aegir3.png"),
         ]
         
         embed.set_image(url="attachment://aegir1.png")
         embeds = [embed]
         
         for i in range(1, len(files)):
-            phase_embed = discord.Embed(
-                title=f"{i+1}페이즈 공략",
+            gate_embed = discord.Embed(
+                title=f"{i+1}관문 공략",
                 color=discord.Color.blue()
             )
-            phase_embed.set_image(url=f"attachment://aegir{i+1}.png")
-            embeds.append(phase_embed)
+            gate_embed.set_image(url=f"attachment://aegir{i+1}.png")
+            embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
 
     @boss.command(name='진아브렐슈드')
-    async def aegir2(self, ctx, difficulty=None):
+    async def abrel_kazeros(self, ctx, difficulty=None):
         """진아브렐슈드 공략"""
         if difficulty is None:
             embed = discord.Embed(
@@ -1401,21 +1401,21 @@ class BossStrategy(commands.Cog): #보스 공략 명령어
         
         difficulty_path = 'normal' if difficulty=='노말' else 'hard'
         files = [
-            discord.File(f"images/kazeros/abrel/{difficulty_path}/phase1.png", filename="abrel1.png"),
-            discord.File(f"images/kazeros/abrel/{difficulty_path}/phase2.png", filename="abrel2.png"),
-            discord.File(f"images/kazeros/abrel/{difficulty_path}/phase3.png", filename="abrel3.png"),
+            discord.File(f"images/kazeros/abrel/{difficulty_path}/1gate.png", filename="abrel1.png"),
+            discord.File(f"images/kazeros/abrel/{difficulty_path}/2gate.png", filename="abrel2.png"),
+            discord.File(f"images/kazeros/abrel/{difficulty_path}/3gate.png", filename="abrel3.png"),
         ]
         
         embed.set_image(url="attachment://abrel1.png")
         embeds = [embed]
         
         for i in range(1, len(files)):
-            phase_embed = discord.Embed(
-                title=f"{i+1}페이즈 공략",
+            gate_embed = discord.Embed(
+                title=f"{i+1}관문 공략",
                 color=discord.Color.dark_blue()
             )
-            phase_embed.set_image(url=f"attachment://abrel{i+1}.png")
-            embeds.append(phase_embed)
+            gate_embed.set_image(url=f"attachment://abrel{i+1}.png")
+            embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
 

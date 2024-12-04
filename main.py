@@ -799,6 +799,7 @@ class BossStrategy(commands.Cog):
                         "• `/보스 에키드나` - 서막\n"
                         "• `/보스 에기르` - 1막\n"
                         "• `/보스 진아브렐슈드` - 2막"
+                        #"• `/보스 신규보스` - 3막"
                     ),
                     inline=False
                 )
@@ -1112,7 +1113,7 @@ class BossStrategy(commands.Cog):
         for i in range(1, len(files)):
             gate_embed = discord.Embed(
                 title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.dark_purple()
+                color=discord.Color.dark_purple() 
             )
             gate_embed.set_image(url=f"attachment://kamen{i+1}.png")
             embeds.append(gate_embed)
@@ -1400,15 +1401,15 @@ class BossStrategy(commands.Cog):
         #신규보스
         if difficulty is None:
             embed = discord.Embed(
-                title="🎷 신규보스 - 2막 : ",
+                title="🎷 신규보스 - 3막 : ",
                 description="난이도를 선택해주세요: `/보스 신규보스 [노말/하드]`",
                 color=discord.Color.dark_yellow()
             )
             embed.add_field(
                 name="난이도 선택",
                 value=(
-                    "• `/보스 진아브렐슈드 노말` - 노말 난이도 공략 (1-2관문)\n"
-                    "• `/보스 진아브렐슈드 하드` - 하드 난이도 공략 (1-2관문)"
+                    "• `/보스 신규보스 노말` - 노말 난이도 공략 (1-2관문)\n"
+                    "• `/보스 신규보스 하드` - 하드 난이도 공략 (1-2관문)"
                 ),
                 inline=False
             )
@@ -1420,7 +1421,7 @@ class BossStrategy(commands.Cog):
             return
 
         embed = discord.Embed(
-            title=f"🎷 신규보스 공략 ({difficulty}) - 2막 : ",
+            title=f"🎷 신규보스 공략 ({difficulty}) - 3막 : ",
             description=f"난이도: {'⭐⭐⭐☆☆' if difficulty=='노말' else '⭐⭐⭐☆☆'}",
             color=discord.Color.dark_yellow()
         )

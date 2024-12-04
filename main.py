@@ -833,7 +833,7 @@ class BossStrategy(commands.Cog):
             embed.add_field(name="🐍 에키드나", value="`/보스 에키드나` - 서막 : 붉어진 백야의 나선", inline=True)
             embed.add_field(name="🔔 에기르", value="`/보스 에기르` - 1막 : 대지를 부수는 업화의 궤적", inline=True)
             embed.add_field(name="🥶 진아브렐슈드", value="`/보스 진아브렐슈드` - 2막 : 부유하는 악몽의 진혼곡", inline=True)
-
+            #embed.add_field(name="🎷 신규보스이름", value="`/보스 신규보스` - 2막 : ", inline=True)
             embed.set_footer(text="💡 각 보스의 상세 공략을 보려면 해당 명령어를 입력하세요.")
             await ctx.send(embed=embed)
 
@@ -1232,12 +1232,12 @@ class BossStrategy(commands.Cog):
         embeds = [embed]
         
         for i in range(1, len(files)):
-            phase_embed = discord.Embed(
+            gate_embed = discord.Embed(
                 title=f"{i+1}번 공략 ({difficulty})",
                 color=discord.Color.light_grey()
             )
-            phase_embed.set_image(url=f"attachment://tower{i+1}.png")
-            embeds.append(phase_embed)
+            gate_embed.set_image(url=f"attachment://tower{i+1}.png")
+            embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
 
@@ -1281,12 +1281,12 @@ class BossStrategy(commands.Cog):
         embeds = [embed]
         
         for i in range(1, len(files)):
-            phase_embed = discord.Embed(
+            gate_embed = discord.Embed(
                 title=f"{i+1}번 공략 ({difficulty})",
                 color=discord.Color.green()
             )
-            phase_embed.set_image(url=f"attachment://ekidna{i+1}.png")
-            embeds.append(phase_embed)
+            gate_embed.set_image(url=f"attachment://ekidna{i+1}.png")
+            embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
 
@@ -1330,12 +1330,12 @@ class BossStrategy(commands.Cog):
         embeds = [embed]
         
         for i in range(1, len(files)):
-            phase_embed = discord.Embed(
+            gate_embed = discord.Embed(
                 title=f"{i+1}번 공략 ({difficulty})",
                 color=discord.Color.blue()
             )
-            phase_embed.set_image(url=f"attachment://aegir{i+1}.png")
-            embeds.append(phase_embed)
+            gate_embed.set_image(url=f"attachment://aegir{i+1}.png")
+            embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
 
@@ -1386,15 +1386,71 @@ class BossStrategy(commands.Cog):
         embeds = [embed]
         
         for i in range(1, len(files)):
-            phase_embed = discord.Embed(
+            gate_embed = discord.Embed(
                 title=f"{i+1}번 공략 ({difficulty})",
                 color=discord.Color.dark_blue()
             )
-            phase_embed.set_image(url=f"attachment://abrel{i+1}.png")
-            embeds.append(phase_embed)
+            gate_embed.set_image(url=f"attachment://abrel{i+1}.png")
+            embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
+"""
+    @boss.command(name='신규보스', aliases=['신규보스'])
+    async def verber(self, ctx, difficulty=None):
+        #신규보스
+        if difficulty is None:
+            embed = discord.Embed(
+                title="🎷 신규보스 - 2막 : ",
+                description="난이도를 선택해주세요: `/보스 신규보스 [노말/하드]`",
+                color=discord.Color.dark_yellow()
+            )
+            embed.add_field(
+                name="난이도 선택",
+                value=(
+                    "• `/보스 진아브렐슈드 노말` - 노말 난이도 공략 (1-2관문)\n"
+                    "• `/보스 진아브렐슈드 하드` - 하드 난이도 공략 (1-2관문)"
+                ),
+                inline=False
+            )
+            await ctx.send(embed=embed)
+            return
+            
+        if difficulty.lower() not in ['노말', '하드']:
+            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
+            return
 
+        embed = discord.Embed(
+            title=f"🎷 신규보스 공략 ({difficulty}) - 2막 : ",
+            description=f"난이도: {'⭐⭐⭐☆☆' if difficulty=='노말' else '⭐⭐⭐☆☆'}",
+            color=discord.Color.dark_yellow()
+        )
+        
+        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
+        # 난이도별로 다른 관문 수 설정
+        files = [
+            discord.File(f"images/kazeros/신규보스/{difficulty_path}/1gate.png", filename="신규보스1.png"),
+            discord.File(f"images/kazeros/신규보스/{difficulty_path}/2gate.png", filename="신규보스2.png"),
+        ]
+        
+        # 노말 난이도일 경우 3관문 추가
+        if difficulty == '노말':
+            files.append(
+                discord.File(f"images/kazeros/신규보스/{difficulty_path}/3gate.png", filename="신규보스3.png"),
+            )
+        
+        embed.set_image(url="attachment://신규보스1.png")
+        embeds = [embed]
+        
+        for i in range(1, len(files)):
+            gate_embed = discord.Embed(
+                title=f"{i+1}번 공략 ({difficulty})",
+                color=discord.Color.dark_yellow()
+            )
+            gate_embed.set_image(url=f"attachment://신규보스{i+1}.png")
+            embeds.append(gate_embed)
+        
+        await ctx.send(files=files, embeds=embeds)
+"""
 #====================================[봇 코드]======================================
 async def setup(bot):
     await bot.add_cog(ChatBot(bot)) #챗봇 명령어

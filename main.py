@@ -1,33 +1,36 @@
 #====================================라이브러리 설정======================================
-from data import Token, GEMINI_API_KEY #봇 토큰, Gemini API 키
-import discord #디스코드 라이브러리
-from discord.ext import commands #명령어 라이브러리
+from bs4 import BeautifulSoup
+from data import Token, GEMINI_API_KEY, CHANNEL_ID #봇 토큰, Gemini API 키
 from datetime import datetime #날짜 라이브러리
+from discord.ext import commands #명령어 라이브러리
+from discord import ButtonStyle, SelectOption #버튼 스타일, 드롭다운 메뉴 옵션 라이브러리
+from discord.ui import Button, View, Select #버튼, 뷰, 드롭다운 메뉴 라이브러리
+from apscheduler.schedulers.asyncio import AsyncIOScheduler #비동기 작업을 처리하기 위한 스케줄러
+from apscheduler.triggers.cron import CronTrigger #스케줄을 설정할 때 CronTrigger 사용
+import google.generativeai as genai #Gemini API 라이브러리
+import discord #디스코드 라이브러리
 import asyncio #비동기 라이브러리
 import calendar #달력 라이브러리
-from discord.ui import Button, View, Select #버튼, 뷰, 드롭다운 메뉴 라이브러리
-from discord import ButtonStyle, SelectOption #버튼 스타일, 드롭다운 메뉴 옵션 라이브러리
-import google.generativeai as genai #Gemini API 라이브러리
+
 
 # Gemini API 설정
 genai.configure(api_key=GEMINI_API_KEY)
-
 intents = discord.Intents.default() # bot이 사용할 기능과 관련된 옵션
 intents.message_content = True      # 사용자의 입력에 따라 작동하는 기능을 개발하기 위해 true 
 bot = commands.Bot(command_prefix='/', intents=intents) #명령어 시작을 '/' 로한다 ex) /help
 Boss_List = ['군단장 레이드', '에픽 레이드', '어비스 레이드', '카제로스 레이드']
-
+schedule = AsyncIOScheduler()
 #====================================봇 초기 설정======================================
 @bot.event
 async def on_ready():
     await setup(bot)
     print(f'{bot.user.name}이 연결되었습니다')
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game("코딩"))
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game("무언가를"))
 
+    schedule.start()
     for guild in bot.guilds:
         if guild.system_channel:
             await guild.system_channel.send(f'{bot.user.name}이 연결되었습니다!')
-
 #봇 재부팅 코드
 @bot.command(name='재부팅', aliases=['reboot', 'restart'])
 @commands.is_owner()  # 봇 소유자만 사용 가능
@@ -48,6 +51,39 @@ async def status(ctx):
     await ctx.send(f'{ctx.author.mention}님, 봇의 상태는 {bot.status}입니다.')
     await ctx.author.send(f'{ctx.author.name}님, 봇의 상태는 {bot.status}입니다.')
 
+#===================================[공지사항 명령어]=====================================
+Discord_Channel = bot.get_channel(CHANNEL_ID)
+LostArkNotice_URL = "https://lostark.game.onstove.com/News/Notice/List"
+
+@bot.command(name='공지사항', aliases=['notice'])
+async def LostArkNotice(ctx):
+    await send_LostArkNotice()
+
+async def send_LostArkNotice():
+    try:
+        Discord_Channel = await bot.fetch_channel(CHANNEL_ID)  # fetch_channel() 사용
+        embed = discord.Embed(
+            title="🔔 공지사항",
+            description="현재까지 올라온 공지내용입니다!",
+            color=discord.Color.purple()
+        )
+        embed.add_field(
+            name="ヾ(•ω•`)o",
+            value=LostArkNotice_URL,
+            inline=False
+        )
+        file_path = "C://Coding_File//Python_Project//DiscordBot//images//banner\\banner_share.png"
+        embed.set_image(url="attachment://banner_share.png")
+        await Discord_Channel.send(embed=embed, file=discord.File(file_path, filename='banner_share.png'))
+        embed.set_footer(text="💡 자세한 내용은 개발자에게 문의해주세요!")
+
+    except discord.NotFound:
+        print(f"Channel with ID {CHANNEL_ID} not found.")
+    except discord.Forbidden:
+        print("Bot does not have permission to access this channel.")
+    except discord.HTTPException:
+        print("An error occurred while trying to access the channel.")
+    
 #===================================[봇 관련 명령어]====================================
 
 #====================================[챗봇 명령어]======================================
@@ -96,6 +132,7 @@ async def help_command(ctx):
             embed.add_field(
                 name="사용 가능한 카테고리",
                 value=(
+                    "• `/공지사항` - 로스트아크 공지사항 홈페이지에 접속\n"
                     "• `/phelp 투표` - 투표 관련 명령어\n"
                     "• `/phelp 챗봇` - Gemini AI 관련 명령어\n"
                     "• `/phelp 보스` - 보스 공략 명령어"
@@ -115,6 +152,13 @@ async def help_command(ctx):
         )
 
         # 카테고리 목록 (한 번만 추가)
+
+        embed.add_field(
+            name="🔔 공지사항",
+            value="로스트아크 공지사항을 보고 싶다면 `/공지사항 or /notice`를 입력하세요.",  # 공지사항 명령어 추가
+            inline=False
+        )
+        
         embed.add_field(
             name="📊 투표",
             value="투표 관련 명령어를 확인하려면 `/phelp 투표`를 입력하세요.", #투표 명령어 추가
@@ -149,6 +193,7 @@ async def help_error(ctx, error):
         embed.add_field(
             name="사용 가능한 카테고리",
             value=(
+                "• `/공지사항` - 로스트아크 공지사항 홈페이지에 접속\n"
                 "• `/phelp 투표` - 투표 관련 명령어\n"
                 "• `/phelp 챗봇` - Gemini AI 관련 명령어\n"
                 "• `/phelp 보스` - 보스 공략 명령어"
@@ -1452,11 +1497,14 @@ class BossStrategy(commands.Cog):
         
         await ctx.send(files=files, embeds=embeds)
 """
-#====================================[봇 코드]======================================
+
+
+#====================================[봇 코드]=====================================
 async def setup(bot):
     await bot.add_cog(ChatBot(bot)) #챗봇 명령어
     await bot.add_cog(Schedule(bot)) #일정 투표 명령어
     await bot.add_cog(BossStrategy(bot)) #보스 공략 명령어
 
+schedule.add_job(send_LostArkNotice, CronTrigger(day_of_week="wed", hour=10, minute=5))
 # 고유 토큰 및 bot 실행
 bot.run(Token)

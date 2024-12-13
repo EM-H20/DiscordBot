@@ -72,9 +72,13 @@ async def send_LostArkNotice():
             value=LostArkNotice_URL,
             inline=False
         )
-        file_path = "C://Coding_File//Python_Project//DiscordBot//images//banner\\banner_share.png"
-        embed.set_image(url="attachment://banner_share.png")
-        await Discord_Channel.send(embed=embed, file=discord.File(file_path, filename='banner_share.png'))
+           
+        files = [
+            discord.File("images/banner/banner_share.png", filename="banner.png"),
+        ]
+        
+        embed.set_image(url="attachment://banner.png")
+        await Discord_Channel.send(file=files[0], embed=embed)
         embed.set_footer(text="💡 자세한 내용은 개발자에게 문의해주세요!")
 
     except discord.NotFound:

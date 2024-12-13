@@ -1505,6 +1505,8 @@ async def setup(bot):
     await bot.add_cog(Schedule(bot)) #일정 투표 명령어
     await bot.add_cog(BossStrategy(bot)) #보스 공략 명령어
 
+# 매주 수요일 오전 10시 05분에 공지사항 출력
 schedule.add_job(send_LostArkNotice, CronTrigger(day_of_week="wed", hour=10, minute=5))
+
 # 고유 토큰 및 bot 실행
 bot.run(Token)

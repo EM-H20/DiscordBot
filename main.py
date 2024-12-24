@@ -1,3 +1,4 @@
+#플래닝
 #====================================라이브러리 설정======================================
 from bs4 import BeautifulSoup
 from data import Token, GEMINI_API_KEY, CHANNEL_ID #봇 토큰, Gemini API 키
@@ -115,7 +116,7 @@ class ChatBot(commands.Cog):
             embed.add_field(name="질문", value=question, inline=False)
 
             await loading_msg.delete() #로딩 메시지 삭제
-            await ctx.send(embed=embed) #답변 표시
+            await ctx.send(embed=embed) #답변 표시  
 
         except Exception as e:
             await ctx.send(f"오류가 발생했습니다: {e}")

@@ -26,7 +26,7 @@ schedule = AsyncIOScheduler()
 async def on_ready():
     await setup(bot)
     print(f'{bot.user.name}이 연결되었습니다')
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game("무언가를"))
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game("/phelp"))
 
     schedule.start()
     for guild in bot.guilds:

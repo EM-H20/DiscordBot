@@ -29,9 +29,7 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Game("/phelp"))
 
     schedule.start()
-    for guild in bot.guilds:
-        if guild.system_channel:
-            await guild.system_channel.send(f'{bot.user.name}이 연결되었습니다!')
+
 #봇 재부팅 코드
 @bot.command(name='재부팅', aliases=['reboot', 'restart'])
 @commands.is_owner()  # 봇 소유자만 사용 가능
@@ -800,6 +798,7 @@ class MultiPollView(View):
         self.add_item(self.date_select)
 
 #====================================[보스 공략 명령어]======================================
+
 class BossStrategy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -1445,64 +1444,6 @@ class BossStrategy(commands.Cog):
             embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
-"""
-    @boss.command(name='신규보스', aliases=['신규보스'])
-    async def verber(self, ctx, difficulty=None):
-        #신규보스
-        if difficulty is None:
-            embed = discord.Embed(
-                title="🎷 신규보스 - 3막 : ",
-                description="난이도를 선택해주세요: `/보스 신규보스 [노말/하드]`",
-                color=discord.Color.dark_yellow()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 신규보스 노말` - 노말 난이도 공략 (1-2관문)\n"
-                    "• `/보스 신규보스 하드` - 하드 난이도 공략 (1-2관문)"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
-            return
-            
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(
-            title=f"🎷 신규보스 공략 ({difficulty}) - 3막 : ",
-            description=f"난이도: {'⭐⭐⭐☆☆' if difficulty=='노말' else '⭐⭐⭐☆☆'}",
-            color=discord.Color.dark_yellow()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        # 난이도별로 다른 관문 수 설정
-        files = [
-            discord.File(f"images/kazeros/신규보스/{difficulty_path}/1gate.png", filename="신규보스1.png"),
-            discord.File(f"images/kazeros/신규보스/{difficulty_path}/2gate.png", filename="신규보스2.png"),
-        ]
-        
-        # 노말 난이도일 경우 3관문 추가
-        if difficulty == '노말':
-            files.append(
-                discord.File(f"images/kazeros/신규보스/{difficulty_path}/3gate.png", filename="신규보스3.png"),
-            )
-        
-        embed.set_image(url="attachment://신규보스1.png")
-        embeds = [embed]
-        
-        for i in range(1, len(files)):
-            gate_embed = discord.Embed(
-                title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.dark_yellow()
-            )
-            gate_embed.set_image(url=f"attachment://신규보스{i+1}.png")
-            embeds.append(gate_embed)
-        
-        await ctx.send(files=files, embeds=embeds)
-"""
-
 
 #====================================[봇 코드]=====================================
 async def setup(bot):

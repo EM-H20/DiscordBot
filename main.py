@@ -815,7 +815,7 @@ class BossStrategy(commands.Cog):
                 )
                 
                 embed.add_field(
-                    name=Boss_List[0],  # 군단장 레이드
+                    name="군단장 레이드",  # 군단장 레이드
                     value=(
                         "• `/보스 발탄` - 마수군단장\n"
                         "• `/보스 비아키스` - 욕망군단장\n"
@@ -828,13 +828,13 @@ class BossStrategy(commands.Cog):
                 )
 
                 embed.add_field(
-                    name=Boss_List[1],  # 에픽 레이드
+                    name="에픽 레이드",  # 에픽 레이드
                     value="• `/보스 베히모스` - 폭풍의 지휘관",
                     inline=False
                 )
 
                 embed.add_field(
-                    name=Boss_List[2],  # 어비스 레이드
+                    name="어비스 레이드",  # 어비스 레이드
                     value=(
                         "• `/보스 카양겔` - 영원한 빛의 요람\n"
                         "• `/보스 상아탑` - 짓밟힌 정원"
@@ -843,12 +843,11 @@ class BossStrategy(commands.Cog):
                 )
 
                 embed.add_field(
-                    name=Boss_List[3],  # 카제로스 레이드
+                    name="카제로스 레이드",  # 카제로스 레이드
                     value=(
                         "• `/보스 에키드나` - 서막\n"
                         "• `/보스 에기르` - 1막\n"
                         "• `/보스 진아브렐슈드` - 2막"
-                        #"• `/보스 신규보스` - 3막"
                     ),
                     inline=False
                 )
@@ -883,28 +882,144 @@ class BossStrategy(commands.Cog):
             embed.add_field(name="🐍 에키드나", value="`/보스 에키드나` - 서막 : 붉어진 백야의 나선", inline=True)
             embed.add_field(name="🔔 에기르", value="`/보스 에기르` - 1막 : 대지를 부수는 업화의 궤적", inline=True)
             embed.add_field(name="🥶 진아브렐슈드", value="`/보스 진아브렐슈드` - 2막 : 부유하는 악몽의 진혼곡", inline=True)
-            #embed.add_field(name="🎷 신규보스이름", value="`/보스 신규보스` - 2막 : ", inline=True)
             embed.set_footer(text="💡 각 보스의 상세 공략을 보려면 해당 명령어를 입력하세요.")
             await ctx.send(embed=embed)
+
+    async def _send_boss_info(self, ctx, boss_name):
+        embed = discord.Embed(
+            title=f"⚔️ {boss_name} 공략 정보 선택",
+            description="난이도를 선택하세요.",
+            color=discord.Color.gold()
+        )
+        
+        # 각 보스에 대한 정보, 난이도 종류에 대한 로직을 추가해야 합니다.
+        # 여기서는 임시로 발탄에 대한 정보만 넣고 보스 이름과 난이도에 따라 동작하도록 수정해야합니다.
+        if boss_name == '발탄':
+            embed.add_field(
+                name="난이도 선택",
+                value="🇳 : 노말  🇭 : 하드",
+                inline=False
+            )
+        elif boss_name == '비아키스':
+            embed.add_field(
+                name="난이도 선택",
+                value="🇳 : 노말  🇭 : 하드",
+                inline=False
+            )
+        elif boss_name == '쿠크세이튼':
+             embed.add_field(
+                name="난이도 선택",
+                value="🇳 : 노말",
+                inline=False
+            )
+        elif boss_name == '아브렐슈드':
+            embed.add_field(
+                name="난이도 선택",
+                value="🇳 : 노말  🇭 : 하드",
+                inline=False
+            )
+        elif boss_name == '일리아칸':
+           embed.add_field(
+               name="난이도 선택",
+               value="🇳 : 노말  🇭 : 하드",
+               inline=False
+           )
+        elif boss_name == '카멘':
+           embed.add_field(
+                name="난이도 선택",
+                value="🇳 : 노말  🇭 : 하드",
+                inline=False
+            )
+        elif boss_name == '베히모스':
+           embed.add_field(
+               name="난이도 선택",
+               value="🇳 : 노말",
+               inline=False
+           )
+        elif boss_name == '카양겔':
+           embed.add_field(
+               name="난이도 선택",
+               value="🇳 : 노말  🇭 : 하드",
+               inline=False
+           )
+        elif boss_name == '상아탑':
+           embed.add_field(
+               name="난이도 선택",
+               value="🇳 : 노말  🇭 : 하드",
+               inline=False
+           )
+        elif boss_name == '에키드나':
+           embed.add_field(
+               name="난이도 선택",
+               value="🇳 : 노말  🇭 : 하드",
+               inline=False
+           )
+        elif boss_name == '에기르':
+           embed.add_field(
+               name="난이도 선택",
+               value="🇳 : 노말  🇭 : 하드",
+               inline=False
+           )
+        elif boss_name == '진아브렐슈드':
+           embed.add_field(
+                name="난이도 선택",
+                value="🇳 : 노말  🇭 : 하드",
+                inline=False
+            )
+        else:
+            await ctx.send("해당 보스 정보가 없습니다.")
+            return
+
+        msg = await ctx.send(embed=embed)
+        await msg.add_reaction("🇳")
+        await msg.add_reaction("🇭")
+
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in ["🇳", "🇭"] and reaction.message.id == msg.id
+        
+        try:
+            reaction, user = await self.bot.wait_for('reaction_add', timeout=10.0, check=check)
+            if str(reaction.emoji) == "🇳":
+              await self._show_difficulty_info(ctx, boss_name, '노말')
+            elif str(reaction.emoji) == "🇭":
+              await self._show_difficulty_info(ctx, boss_name, '하드')
+        except asyncio.TimeoutError:
+            await msg.delete()
+            
+        await msg.delete()  
+    
+    async def _show_difficulty_info(self, ctx, boss_name, difficulty):
+        if boss_name == '발탄':
+            await self.valtan(ctx, difficulty)
+        elif boss_name == '비아키스':
+            await self.vykas(ctx, difficulty)
+        elif boss_name == '쿠크세이튼':
+             await self.kouku(ctx, difficulty)
+        elif boss_name == '아브렐슈드':
+            await self.abrelshud(ctx, difficulty)
+        elif boss_name == '일리아칸':
+           await self.illakan(ctx, difficulty)
+        elif boss_name == '카멘':
+            await self.kamen(ctx, difficulty)
+        elif boss_name == '베히모스':
+            await self.behimos(ctx, difficulty)
+        elif boss_name == '카양겔':
+            await self.kayangel(ctx, difficulty)
+        elif boss_name == '상아탑':
+            await self.tower(ctx, difficulty)
+        elif boss_name == '에키드나':
+            await self.ekidna(ctx, difficulty)
+        elif boss_name == '에기르':
+            await self.aegir1(ctx, difficulty)
+        elif boss_name == '진아브렐슈드':
+             await self.aegir2(ctx, difficulty)
+        
 
     @boss.command(name='발탄')
     async def valtan(self, ctx, difficulty=None):
         """발탄 공략"""
         if difficulty is None:
-            embed = discord.Embed(
-                title="🐺 발탄 공략 - 마수군단장",
-                description="난이도를 선택해주세요: `/보스 발탄 [노말/하드]`",
-                color=discord.Color.red()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 발탄 노말` - 노말 난이도 공략\n"
-                    "• `/보스 발탄 하드` - 하드 난이도 공략"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
+            await self._send_boss_info(ctx, '발탄')
             return
 
         if difficulty.lower() not in ['노말', '하드']:
@@ -930,21 +1045,8 @@ class BossStrategy(commands.Cog):
     async def vykas(self, ctx, difficulty=None):
         """비아키스 공략"""
         if difficulty is None:
-            embed = discord.Embed(
-                title="👻 비아키스 공략 - 욕망군단장",
-                description="난이도를 선택해주세요: `/보스 비아키스 [노말/하드]`",
-                color=discord.Color.purple()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 비아키스 노말` - 노말 난이도 공략\n"
-                    "• `/보스 비아키스 하드` - 하드 난이도 공략"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
-            return
+           await self._send_boss_info(ctx, '비아키스')
+           return
 
         if difficulty.lower() not in ['노말', '하드']:
             await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
@@ -967,20 +1069,8 @@ class BossStrategy(commands.Cog):
     @boss.command(name='쿠크세이튼', aliases=['쿠크'])
     async def kouku(self, ctx, difficulty='노말'):
         """쿠크세이튼 공략"""
-        if difficulty not in ['노말']:
-            embed = discord.Embed(
-                title="🎭 쿠크세이튼 공략 - 광기군단장",
-                description="난이도를 선택해주세요: `/보스 쿠크세이튼 [노말]",
-                color=discord.Color.dark_gold()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 쿠크세이튼 노말` - 노말 난이도 공략"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
+        if difficulty != '노말':
+            await self._send_boss_info(ctx, '쿠크세이튼')
             return
 
         if difficulty.lower() not in ['노말']:
@@ -1017,21 +1107,8 @@ class BossStrategy(commands.Cog):
     async def abrelshud(self, ctx, difficulty=None):
         """아브렐슈드 공략"""
         if difficulty is None:
-            embed = discord.Embed(
-                title="🌙 아브렐슈드 공략 - 몽환군단장",
-                description="난이도를 선택해주세요: `/보스 아브렐슈드 [노말/하드]`",
-                color=discord.Color.dark_red()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 아브렐슈드 노말` - 노말 난이도 공략\n"
-                    "• `/보스 아브렐슈드 하드` - 하드 난이도 공략"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
-            return
+           await self._send_boss_info(ctx, '아브렐슈드')
+           return
 
         if difficulty.lower() not in ['노말', '하드']:
             await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
@@ -1047,7 +1124,7 @@ class BossStrategy(commands.Cog):
         files = [
             discord.File(f"images/legion/abrelshud/{difficulty_path}/1gate.png", filename="abrel1.png"),
             discord.File(f"images/legion/abrelshud/{difficulty_path}/2gate.png", filename="abrel2.png"),
-         ]
+        ]
         
         embed.set_image(url="attachment://abrel1.png")
         embeds = [embed]
@@ -1066,20 +1143,7 @@ class BossStrategy(commands.Cog):
     async def illakan(self, ctx, difficulty=None):
         """일리아칸 공략"""
         if difficulty is None:
-            embed = discord.Embed(
-                title="🦠 일리아칸 공략 - 질병군단장",
-                description="난이도를 선택해주세요: `/보스 일리아칸 [노말/하드]`",
-                color=discord.Color.gold()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 일리아칸 노말` - 노말 난이도 공략\n"
-                    "• `/보스 일리아칸 하드` - 하드 난이도 공략"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
+            await self._send_boss_info(ctx, '일리아칸')
             return
 
         if difficulty.lower() not in ['노말', '하드']:
@@ -1116,20 +1180,7 @@ class BossStrategy(commands.Cog):
     async def kamen(self, ctx, difficulty=None):
         """카멘 공략"""
         if difficulty is None:
-            embed = discord.Embed(
-                title="⚡ 카멘 공략 - 어둠군단장",
-                description="난이도를 선택해주세요: `/보스 카멘 [노말/하드]`",
-                color=discord.Color.dark_purple()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 카멘 노말` - 노말 난이도 공략 (1-3관문)\n"
-                    "• `/보스 카멘 하드` - 하드 난이도 공략 (1-4관문)"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
+            await self._send_boss_info(ctx, '카멘')
             return
 
         if difficulty.lower() not in ['노말', '하드']:
@@ -1172,18 +1223,8 @@ class BossStrategy(commands.Cog):
     @boss.command(name='베히모스', aliases=['베히'])
     async def behimos(self, ctx, difficulty='노말'):
         """베히모스 공략"""
-        if difficulty not in ['노말']:
-            embed = discord.Embed(
-                title="🐉️ 베히모스 공략 - 폭풍의 지휘관",
-                description="난이도를 선택해주세요: `/보스 베히모스 노말",
-                color=discord.Color.blue()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value="• `/보스 베히모스 노말` - 노말 난이도 공략",  # 노말만 표시
-                inline=False
-            )
-            await ctx.send(embed=embed)
+        if difficulty != '노말':
+            await self._send_boss_info(ctx, '베히모스')
             return
 
         if difficulty.lower() != '노말':  # 노말만 허용
@@ -1207,20 +1248,7 @@ class BossStrategy(commands.Cog):
     async def kayangel(self, ctx, difficulty=None):
         """카양겔 공략"""
         if difficulty is None:
-            embed = discord.Embed(
-                title="✨ 카양겔 공략 - 영원한 빛의 요람",
-                description="난이도를 선택해주세요: `/보스 카양겔 [노말/하드]`",
-                color=discord.Color.blue()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 카양겔 노말` - 노말 난이도 공략\n"
-                    "• `/보스 카양겔 하드` - 하드 난이도 공략"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
+            await self._send_boss_info(ctx, '카양겔')
             return
 
         if difficulty.lower() not in ['노말', '하드']:
@@ -1245,21 +1273,8 @@ class BossStrategy(commands.Cog):
     async def tower(self, ctx, difficulty=None):
         """상아탑 공략"""
         if difficulty is None:
-            embed = discord.Embed(
-                title="🗼 상아탑 공략 - 짓밟힌 정원",
-                description="난이도를 선택해주세요: `/보스 상아탑 [노말/하드]`",
-                color=discord.Color.light_grey()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 상아탑 노말` - 노말 난이도 공략\n"
-                    "• `/보스 상아탑 하드` - 하드 난이도 공략"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
-            return
+           await self._send_boss_info(ctx, '상아탑')
+           return
 
         if difficulty.lower() not in ['노말', '하드']:
             await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
@@ -1295,21 +1310,8 @@ class BossStrategy(commands.Cog):
     async def ekidna(self, ctx, difficulty=None):
         """에키드나 공략"""
         if difficulty is None:
-            embed = discord.Embed(
-                title="🐍 에키드나 공략 - 서막 : 붉어진 백야의 나선",
-                description="난이도를 선택해주세요: `/보스 에키드나 [노말/하드]`",
-                color=discord.Color.green()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 에키드나 노말` - 노말 난이도 공략\n"
-                    "• `/보스 에키드나 하드` - 하드 난이도 공략"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
-            return
+           await self._send_boss_info(ctx, '에키드나')
+           return
 
         if difficulty.lower() not in ['노말', '하드']:
             await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
@@ -1344,20 +1346,7 @@ class BossStrategy(commands.Cog):
     async def aegir1(self, ctx, difficulty=None):
         """에기르 1막 공략"""
         if difficulty is None:
-            embed = discord.Embed(
-                title="🔔 에기르 공략 - 1막 : 대지를 부수는 업화의 궤적",
-                description="난이도를 선택해주세요: `/보스 에기르 [노말/하드]`",
-                color=discord.Color.blue()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 에기르 노말` - 노말 난이도 공략\n"
-                    "• `/보스 에기르 하드` - 하드 난이도 공략"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
+            await self._send_boss_info(ctx, '에기르')
             return
 
         if difficulty.lower() not in ['노말', '하드']:
@@ -1393,22 +1382,9 @@ class BossStrategy(commands.Cog):
     async def aegir2(self, ctx, difficulty=None):
         """진아브렐슈드 공략"""
         if difficulty is None:
-            embed = discord.Embed(
-                title="🥶 진아브렐슈드 공략 - 2막 : 부유하는 악몽의 진혼곡",
-                description="난이도를 선택해주세요: `/보스 진아브렐슈드 [노말/하드]`",
-                color=discord.Color.dark_blue()
-            )
-            embed.add_field(
-                name="난이도 선택",
-                value=(
-                    "• `/보스 진아브렐슈드 노말` - 노말 난이도 공략 (1-2관문)\n"
-                    "• `/보스 진아브렐슈드 하드` - 하드 난이도 공략 (1-2관문)"
-                ),
-                inline=False
-            )
-            await ctx.send(embed=embed)
-            return
-            
+           await self._send_boss_info(ctx, '진아브렐슈드')
+           return
+
         if difficulty.lower() not in ['노말', '하드']:
             await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
             return

@@ -805,7 +805,9 @@ class BossStrategy(commands.Cog):
 
     @commands.group(name='보스', aliases=['boss', 'b'])
     async def boss(self, ctx):
-        """보스 공략 명령어"""
+        """보스 공략 명령어 그룹
+        :param ctx: discord.ext.commands.Context 객체 (명령어 컨텍스트)
+        """
         if ctx.invoked_subcommand is None:  # 하위 명령어가 없는 경우
             if len(ctx.message.content.split()) > 1:  # 잘못된 보스 이름이 입력된 경우
                 embed = discord.Embed(
@@ -894,101 +896,66 @@ class BossStrategy(commands.Cog):
         
         # 각 보스에 대한 정보, 난이도 종류에 대한 로직을 추가해야 합니다.
         # 여기서는 임시로 발탄에 대한 정보만 넣고 보스 이름과 난이도에 따라 동작하도록 수정해야합니다.
-        if boss_name == '발탄':
+        
+        difficulty_emojis = {
+            '발탄': ['🇳', '🇭'],
+            '비아키스': ['🇳', '🇭'],
+            '쿠크세이튼': ['🇳'],
+            '아브렐슈드': ['🇳', '🇭'],
+            '일리아칸': ['🇳', '🇭'],
+            '카멘': ['🇳', '🇭'],
+            '베히모스': ['🇳'],
+            '카양겔': ['🇳', '🇭'],
+            '상아탑': ['🇳', '🇭'],
+            '에키드나': ['🇳', '🇭'],
+            '에기르': ['🇳', '🇭'],
+            '진아브렐슈드': ['🇳', '🇭'],
+        }
+        
+        if boss_name in difficulty_emojis:  # 보스 이름이 딕셔너리에 있는 경우
+            emojis = difficulty_emojis[boss_name] # 해당 보스의 난이도 이모티콘 가져오기
+            emoji_str = ' '.join([f"{e} : {'노말' if e == '🇳' else '하드'}" for e in emojis])  #난이도 이모티콘을 문자열로 변환
             embed.add_field(
                 name="난이도 선택",
-                value="🇳 : 노말  🇭 : 하드",
-                inline=False
-            )
-        elif boss_name == '비아키스':
-            embed.add_field(
-                name="난이도 선택",
-                value="🇳 : 노말  🇭 : 하드",
-                inline=False
-            )
-        elif boss_name == '쿠크세이튼':
-             embed.add_field(
-                name="난이도 선택",
-                value="🇳 : 노말",
-                inline=False
-            )
-        elif boss_name == '아브렐슈드':
-            embed.add_field(
-                name="난이도 선택",
-                value="🇳 : 노말  🇭 : 하드",
-                inline=False
-            )
-        elif boss_name == '일리아칸':
-           embed.add_field(
-               name="난이도 선택",
-               value="🇳 : 노말  🇭 : 하드",
-               inline=False
-           )
-        elif boss_name == '카멘':
-           embed.add_field(
-                name="난이도 선택",
-                value="🇳 : 노말  🇭 : 하드",
-                inline=False
-            )
-        elif boss_name == '베히모스':
-           embed.add_field(
-               name="난이도 선택",
-               value="🇳 : 노말",
-               inline=False
-           )
-        elif boss_name == '카양겔':
-           embed.add_field(
-               name="난이도 선택",
-               value="🇳 : 노말  🇭 : 하드",
-               inline=False
-           )
-        elif boss_name == '상아탑':
-           embed.add_field(
-               name="난이도 선택",
-               value="🇳 : 노말  🇭 : 하드",
-               inline=False
-           )
-        elif boss_name == '에키드나':
-           embed.add_field(
-               name="난이도 선택",
-               value="🇳 : 노말  🇭 : 하드",
-               inline=False
-           )
-        elif boss_name == '에기르':
-           embed.add_field(
-               name="난이도 선택",
-               value="🇳 : 노말  🇭 : 하드",
-               inline=False
-           )
-        elif boss_name == '진아브렐슈드':
-           embed.add_field(
-                name="난이도 선택",
-                value="🇳 : 노말  🇭 : 하드",
+                value=emoji_str,
                 inline=False
             )
         else:
             await ctx.send("해당 보스 정보가 없습니다.")
             return
 
-        msg = await ctx.send(embed=embed)
-        await msg.add_reaction("🇳")
-        await msg.add_reaction("🇭")
-
+        msg = await ctx.send(embed=embed) # 임베드 메시지 전송
+        for emoji in emojis:  # 모든 난이도 이모티콘에 대한 반응 추가
+            await msg.add_reaction(emoji) # 메시지에 난이도 이모티콘 추가
+            
         def check(reaction, user):
-            return user == ctx.author and str(reaction.emoji) in ["🇳", "🇭"] and reaction.message.id == msg.id
+            """
+            반응 확인 함수
+            :param reaction: discord.Reaction 객체 (반응)
+            :param user: discord.User 객체 (반응한 사용자)
+            :return: bool (반응 조건 충족 여부)
+            """
+            return user == ctx.author and str(reaction.emoji) in emojis and reaction.message.id == msg.id
+            # 반응한 사용자가 명령어 사용자, 이모티콘이 난이도 이모티콘 중 하나, 반응한 메시지가 현재 메시지인지 확인
         
         try:
-            reaction, user = await self.bot.wait_for('reaction_add', timeout=10.0, check=check)
-            if str(reaction.emoji) == "🇳":
-              await self._show_difficulty_info(ctx, boss_name, '노말')
-            elif str(reaction.emoji) == "🇭":
-              await self._show_difficulty_info(ctx, boss_name, '하드')
-        except asyncio.TimeoutError:
-            await msg.delete()
+            reaction, user = await self.bot.wait_for('reaction_add', timeout=10.0, check=check)  # 반응 대기 (10초 제한)
+            if str(reaction.emoji) == "🇳": # 노말 이모티콘 반응
+              await self._show_difficulty_info(ctx, boss_name, '노말') # 노말 난이도 정보 표시 함수 호출
+            elif str(reaction.emoji) == "🇭": # 하드 이모티콘 반응
+              await self._show_difficulty_info(ctx, boss_name, '하드') # 하드 난이도 정보 표시 함수 호출
+        except asyncio.TimeoutError: # 시간 초과 예외 처리
+            await msg.delete() # 시간 초과 시 메시지 삭제
             
-        await msg.delete()  
+        await msg.delete()  # 반응 선택 후 메시지 삭제
     
     async def _show_difficulty_info(self, ctx, boss_name, difficulty):
+        """
+         선택된 난이도에 맞는 보스 공략 정보 표시
+        :param ctx: discord.ext.commands.Context 객체 (명령어 컨텍스트)
+        :param boss_name: str (보스 이름)
+        :param difficulty: str (난이도)
+        """
         if boss_name == '발탄':
             await self.valtan(ctx, difficulty)
         elif boss_name == '비아키스':
@@ -1017,7 +984,11 @@ class BossStrategy(commands.Cog):
 
     @boss.command(name='발탄')
     async def valtan(self, ctx, difficulty=None):
-        """발탄 공략"""
+        """
+        발탄 공략 명령어
+        :param ctx: discord.ext.commands.Context 객체 (명령어 컨텍스트)
+        :param difficulty: str (난이도, None일 수 있음)
+        """
         if difficulty is None:
             await self._send_boss_info(ctx, '발탄')
             return

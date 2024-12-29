@@ -50,76 +50,7 @@ async def status(ctx):
     await ctx.send(f'{ctx.author.mention}님, 봇의 상태는 {bot.status}입니다.')
     await ctx.author.send(f'{ctx.author.name}님, 봇의 상태는 {bot.status}입니다.')
 
-#===================================[공지사항 명령어]=====================================
-Discord_Channel = bot.get_channel(CHANNEL_ID)
-LostArkNotice_URL = "https://lostark.game.onstove.com/News/Notice/List"
-
-@bot.command(name='공지사항', aliases=['notice'])
-async def LostArkNotice(ctx):
-    await send_LostArkNotice()
-
-async def send_LostArkNotice():
-    try:
-        Discord_Channel = await bot.fetch_channel(CHANNEL_ID)  # fetch_channel() 사용
-        embed = discord.Embed(
-            title="🔔 공지사항",
-            description="현재까지 올라온 공지내용입니다!",
-            color=discord.Color.purple()
-        )
-        embed.add_field(
-            name="ヾ(•ω•`)o",
-            value=LostArkNotice_URL,
-            inline=False
-        )
-           
-        files = [
-            discord.File("images/banner/banner_share.png", filename="banner.png"),
-        ]
-        
-        embed.set_image(url="attachment://banner.png")
-        await Discord_Channel.send(file=files[0], embed=embed)
-        embed.set_footer(text="💡 자세한 내용은 개발자에게 문의해주세요!")
-
-    except discord.NotFound:
-        print(f"Channel with ID {CHANNEL_ID} not found.")
-    except discord.Forbidden:
-        print("Bot does not have permission to access this channel.")
-    except discord.HTTPException:
-        print("An error occurred while trying to access the channel.")
-    
 #===================================[봇 관련 명령어]====================================
-
-#====================================[챗봇 명령어]======================================
-class ChatBot(commands.Cog):  
-    def __init__(self, bot): 
-        self.bot = bot #봇 객체
-        self.model = genai.GenerativeModel('gemini-pro') #Gemini API 모델
-        self.chat = self.model.start_chat(history=[]) #Gemini API 챗봇
-
-    @commands.command(name='질문', aliases=['ask', 'gemini', 'g']) 
-    async def ask(self, ctx, *, question): #매개변수 : 채널, 질문
-        """Gemini에게 질문하기"""
-        try:
-            loading_msg = await ctx.send("🤔 답변을 생성하고 있습니다...") #로딩 메시지
-
-            # Gemini API 호출
-            response = await self.chat.send_message_async(question)
-            answer = response.text
-
-            embed = discord.Embed( #답변 표시
-                title="🤖 Gemini 답변",
-                description=answer,
-                color=discord.Color.blue()
-            )
-            embed.add_field(name="질문", value=question, inline=False)
-
-            await loading_msg.delete() #로딩 메시지 삭제
-            await ctx.send(embed=embed) #답변 표시  
-
-        except Exception as e:
-            await ctx.send(f"오류가 발생했습니다: {e}")
-            print(f"Gemini Error: {e}")
-
 #====================================[봇 help 코드]======================================
 @bot.group(name='phelp', aliases=['p도움말'])
 async def help_command(ctx):
@@ -135,6 +66,7 @@ async def help_command(ctx):
             embed.add_field(
                 name="사용 가능한 카테고리",
                 value=(
+                    "• `/정책사항` - 정책사이트 링크에 접속\n"
                     "• `/공지사항` - 로스트아크 공지사항 홈페이지에 접속\n"
                     "• `/phelp 투표` - 투표 관련 명령어\n"
                     "• `/phelp 챗봇` - Gemini AI 관련 명령어\n"
@@ -155,6 +87,11 @@ async def help_command(ctx):
         )
 
         # 카테고리 목록 (한 번만 추가)
+        embed.add_field(
+            name="📜 정책사항",
+            value="정책사항을 보고 싶다면 `/정책사항 or /policy`를 입력하세요.",  # 공지사항 명령어 추가
+            inline=False
+        )
 
         embed.add_field(
             name="🔔 공지사항",
@@ -196,6 +133,7 @@ async def help_error(ctx, error):
         embed.add_field(
             name="사용 가능한 카테고리",
             value=(
+                "• `/정책사항` - 정책사이트 링크에 접속\n"
                 "• `/공지사항` - 로스트아크 공지사항 홈페이지에 접속\n"
                 "• `/phelp 투표` - 투표 관련 명령어\n"
                 "• `/phelp 챗봇` - Gemini AI 관련 명령어\n"
@@ -360,6 +298,98 @@ async def help_boss(ctx):
 
     embed.set_footer(text="💡 각 보스의 상세 공략을 보려면 해당 명령어를 입력하세요.")
     await ctx.send(embed=embed)
+
+#===================================[공지사항 명령어]=====================================
+Discord_Channel = bot.get_channel(CHANNEL_ID)
+LostArkNotice_URL = "https://lostark.game.onstove.com/News/Notice/List"
+
+@bot.command(name='공지사항', aliases=['notice'])
+async def LostArkNotice(ctx):
+    await send_LostArkNotice()
+
+async def send_LostArkNotice():
+    try:
+        Discord_Channel = await bot.fetch_channel(CHANNEL_ID)  # fetch_channel() 사용
+        embed = discord.Embed(
+            title="🔔 공지사항",
+            description="현재까지 올라온 공지내용입니다!",
+            color=discord.Color.purple()
+        )
+        embed.add_field(
+            name="ヾ(•ω•`)o",
+            value=LostArkNotice_URL,
+            inline=False
+        )
+           
+        files = [
+            discord.File("images/banner/banner_share.png", filename="banner.png"),
+        ]
+        
+        embed.set_image(url="attachment://banner.png")
+        await Discord_Channel.send(file=files[0], embed=embed)
+        embed.set_footer(text="💡 자세한 내용은 개발자에게 문의해주세요!")
+
+    except discord.NotFound:
+        print(f"Channel with ID {CHANNEL_ID} not found.")
+    except discord.Forbidden:
+        print("Bot does not have permission to access this channel.")
+    except discord.HTTPException:
+        print("An error occurred while trying to access the channel.")
+    
+
+#===================================[정책사항 명령어]===================================
+
+class PolicyCog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(name='정책사항', aliases=['policy'])
+    async def policy(self, ctx):
+        """정책사항, 서비스약관, 개인정보처리방침 링크를 보여줍니다."""
+        embed = discord.Embed(
+            title="📜 정책 사항",
+            description="아래 링크에서 서비스약관 및 개인정보처리방침을 확인하실 수 있습니다.",
+            color=discord.Color.blue()
+        )
+        # 실제 정책사항, 서비스약관, 개인정보처리방침 링크로 변경해주세요.
+        Terms_of_Service = "https://gist.github.com/EM-H20/3d980bb67316ba4f8836650af9630285"  # 서비스약관 링크
+        Privacy_Policy = "https://gist.github.com/EM-H20/6aaefdaa5c5a15fcbcbb36131aa764aa" # 개인정보처리방침 링크
+
+        embed.add_field(name="서비스약관 링크", value=f"[확인하기]({Terms_of_Service})", inline=False)
+        embed.add_field(name="개인정보처리방침 링크", value=f"[확인하기]({Privacy_Policy})", inline=False)
+
+        await ctx.send(embed=embed)
+
+#====================================[챗봇 명령어]======================================
+class ChatBot(commands.Cog):  
+    def __init__(self, bot): 
+        self.bot = bot #봇 객체
+        self.model = genai.GenerativeModel('gemini-pro') #Gemini API 모델
+        self.chat = self.model.start_chat(history=[]) #Gemini API 챗봇
+
+    @commands.command(name='질문', aliases=['ask', 'gemini', 'g']) 
+    async def ask(self, ctx, *, question): #매개변수 : 채널, 질문
+        """Gemini에게 질문하기"""
+        try:
+            loading_msg = await ctx.send("🤔 답변을 생성하고 있습니다...") #로딩 메시지
+
+            # Gemini API 호출
+            response = await self.chat.send_message_async(question)
+            answer = response.text
+
+            embed = discord.Embed( #답변 표시
+                title="🤖 Gemini 답변",
+                description=answer,
+                color=discord.Color.blue()
+            )
+            embed.add_field(name="질문", value=question, inline=False)
+
+            await loading_msg.delete() #로딩 메시지 삭제
+            await ctx.send(embed=embed) #답변 표시  
+
+        except Exception as e:
+            await ctx.send(f"오류가 발생했습니다: {e}")
+            print(f"Gemini Error: {e}")
 
 #====================================[일정 투표 명령어]======================================
 class DateSelect(Select):
@@ -1397,6 +1427,8 @@ async def setup(bot):
     await bot.add_cog(ChatBot(bot)) #챗봇 명령어
     await bot.add_cog(Schedule(bot)) #일정 투표 명령어
     await bot.add_cog(BossStrategy(bot)) #보스 공략 명령어
+    await bot.add_cog(PolicyCog(bot))
+
 
 # 매주 수요일 오전 10시 05분에 공지사항 출력
 schedule.add_job(send_LostArkNotice, CronTrigger(day_of_week="wed", hour=10, minute=5))

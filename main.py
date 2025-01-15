@@ -880,6 +880,7 @@ class BossStrategy(commands.Cog):
                         "• `/보스 에키드나` - 서막\n"
                         "• `/보스 에기르` - 1막\n"
                         "• `/보스 진아브렐슈드` - 2막"
+                        "• `/보스 모르둠` - 3막"
                     ),
                     inline=False
                 )
@@ -914,6 +915,7 @@ class BossStrategy(commands.Cog):
             embed.add_field(name="🐍 에키드나", value="`/보스 에키드나` - 서막 : 붉어진 백야의 나선", inline=True)
             embed.add_field(name="🔔 에기르", value="`/보스 에기르` - 1막 : 대지를 부수는 업화의 궤적", inline=True)
             embed.add_field(name="🥶 진아브렐슈드", value="`/보스 진아브렐슈드` - 2막 : 부유하는 악몽의 진혼곡", inline=True)
+            embed.add_field(name="⚜ 모르둠", value="`/보스 모르둠` - 3막 : 칠흑, 폭풍의 밤", inline=True)
             embed.set_footer(text="💡 각 보스의 상세 공략을 보려면 해당 명령어를 입력하세요.")
             await ctx.send(embed=embed)
 
@@ -940,6 +942,7 @@ class BossStrategy(commands.Cog):
             '에키드나': ['🇳', '🇭'],
             '에기르': ['🇳', '🇭'],
             '진아브렐슈드': ['🇳', '🇭'],
+            '모르둠' : ['🇳', '🇭'],
         }
         
         if boss_name in difficulty_emojis:  # 보스 이름이 딕셔너리에 있는 경우
@@ -1009,7 +1012,9 @@ class BossStrategy(commands.Cog):
         elif boss_name == '에기르':
             await self.aegir1(ctx, difficulty)
         elif boss_name == '진아브렐슈드':
-             await self.aegir2(ctx, difficulty)
+             await self.abrel(ctx, difficulty)
+        elif boss_name == '모르둠':
+             await self.mordum(ctx, difficulty)
         
 
     @boss.command(name='발탄')
@@ -1345,7 +1350,7 @@ class BossStrategy(commands.Cog):
 
     @boss.command(name='에기르', aliases=['에기', '기르'])
     async def aegir1(self, ctx, difficulty=None):
-        """에기르 1막 공략"""
+        """에기르 공략"""
         if difficulty is None:
             await self._send_boss_info(ctx, '에기르')
             return
@@ -1380,7 +1385,7 @@ class BossStrategy(commands.Cog):
         await ctx.send(files=files, embeds=embeds)
 
     @boss.command(name='진아브렐슈드', aliases=['진아브'])
-    async def aegir2(self, ctx, difficulty=None):
+    async def abrel(self, ctx, difficulty=None):
         """진아브렐슈드 공략"""
         if difficulty is None:
            await self._send_boss_info(ctx, '진아브렐슈드')
@@ -1421,6 +1426,43 @@ class BossStrategy(commands.Cog):
             embeds.append(gate_embed)
         
         await ctx.send(files=files, embeds=embeds)
+
+    @boss.command(name='모르둠')
+    async def mordum(self, ctx, difficulty=None):
+        """모르둠 공략"""
+        if difficulty is None:
+            await self._send_boss_info(ctx, '모르둠')
+            return
+
+        if difficulty.lower() not in ['노말', '하드']:
+            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
+            return
+
+        embed = discord.Embed(                   
+            title=f"⚜ 모르둠 공략 ({difficulty}) - 3막 : 칠흑, 폭풍의 밤",
+            description=f"난이도: {'⭐⭐⭐☆☆' if difficulty=='노말' else '⭐⭐⭐☆☆'}",
+            color=discord.Color.blue()
+        )
+        
+        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
+        files = [
+            discord.File(f"images/kazeros/mordum/{difficulty_path}/1gate.png", filename="mordum1.png"),
+            discord.File(f"images/kazeros/mordum/{difficulty_path}/2gate.png", filename="mordum2.png"),
+        ]
+        
+        embed.set_image(url="attachment://mordum1.png")
+        embeds = [embed]
+        
+        for i in range(1, len(files)):
+            gate_embed = discord.Embed(
+                title=f"{i+1}번 공략 ({difficulty})",
+                color=discord.Color.green()
+            )
+            gate_embed.set_image(url=f"attachment://mordum{i+1}.png")
+            embeds.append(gate_embed)
+        
+        await ctx.send(files=files, embeds=embeds)
+    
 
 #====================================[봇 코드]=====================================
 async def setup(bot):

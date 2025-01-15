@@ -1,0 +1,208 @@
+{
+  "bosses": {
+    "발탄": {
+      "name": "발탄",
+      "aliases": ["발탄"],
+      "description": "마수군단장",
+      "color": "red",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/legion/valtan",
+      "gate_count": {
+        "노말": 1,
+        "하드": 1
+      },
+      "difficulty_stars": {
+        "노말": "⭐☆☆☆☆",
+        "하드": "⭐☆☆☆☆"
+      }
+    },
+    "비아키스": {
+      "name": "비아키스",
+      "aliases": ["비아키스", "비아"],
+      "description": "욕망군단장",
+      "color": "purple",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/legion/vykas",
+      "gate_count": {
+        "노말": 1,
+        "하드": 1
+      },
+      "difficulty_stars": {
+        "노말": "⭐☆☆☆☆",
+        "하드": "⭐☆☆☆☆"
+      }
+    },
+    "쿠크세이튼": {
+      "name": "쿠크세이튼",
+      "aliases": ["쿠크세이튼", "쿠크"],
+      "description": "광기군단장",
+      "color": "dark_gold",
+      "difficulties": ["노말"],
+      "image_path": "images/legion/kouku",
+      "gate_count": {
+        "노말": 3
+      },
+      "difficulty_stars": {
+        "노말": "⭐☆☆☆☆"
+      }
+    },
+    "아브렐슈드": {
+      "name": "아브렐슈드",
+      "aliases": ["아브렐슈드", "아브"],
+      "description": "몽환군단장",
+      "color": "dark_red",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/legion/abrelshud",
+      "gate_count": {
+        "노말": 2,
+        "하드": 2
+      },
+      "difficulty_stars": {
+        "노말": "⭐☆☆☆☆",
+        "하드": "⭐☆☆☆☆"
+      }
+    },
+    "일리아칸": {
+      "name": "일리아칸",
+      "aliases": ["일리아칸", "일리", "아칸"],
+      "description": "질병군단장",
+      "color": "gold",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/legion/illakan",
+      "gate_count": {
+        "노말": 3,
+        "하드": 3
+      },
+      "difficulty_stars": {
+        "노말": "⭐☆☆☆☆",
+        "하드": "⭐☆☆☆☆"
+      }
+    },
+    "카멘": {
+      "name": "카멘",
+      "aliases": ["카멘"],
+      "description": "어둠군단장",
+      "color": "dark_purple",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/legion/kamen",
+      "gate_count": {
+        "노말": 2,
+        "하드": 4
+      },
+      "difficulty_stars": {
+        "노말": "⭐⭐⭐☆☆",
+        "하드": "⭐⭐⭐⭐☆"
+      }
+    },
+    "베히모스": {
+      "name": "베히모스",
+      "aliases": ["베히모스", "베히"],
+      "description": "폭풍의 지휘관",
+      "color": "blue",
+      "difficulties": ["노말"],
+      "image_path": "images/epic/behimos",
+      "gate_count": {
+        "노말": 1
+      },
+      "difficulty_stars": {
+        "노말": "⭐☆☆☆☆"
+      }
+    },
+    "카양겔": {
+      "name": "카양겔",
+      "aliases": ["카양겔", "양겔"],
+      "description": "영원한 빛의 요람",
+      "color": "blue",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/abyss/kayangel",
+      "gate_count": {
+        "노말": 1,
+        "하드": 1
+      },
+      "difficulty_stars": {
+        "노말": "⭐☆☆☆☆",
+        "하드": "⭐☆☆☆☆"
+      }
+    },
+    "상아탑": {
+      "name": "상아탑",
+      "aliases": ["상아탑", "탑"],
+      "description": "짓밟힌 정원",
+      "color": "light_grey",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/abyss/tower",
+      "gate_count": {
+        "노말": 3,
+        "하드": 3
+      },
+      "difficulty_stars": {
+        "노말": "⭐☆☆☆☆",
+        "하드": "⭐☆☆☆☆"
+      }
+    },
+    "에키드나": {
+      "name": "에키드나",
+      "aliases": ["에키드나", "에키"],
+      "description": "서막 : 붉어진 백야의 나선",
+      "color": "green",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/kazeros/ekidna",
+      "gate_count": {
+        "노말": 2,
+        "하드": 2
+      },
+      "difficulty_stars": {
+        "노말": "⭐⭐☆☆☆",
+        "하드": "⭐⭐☆☆☆"
+      }
+    },
+    "에기르": {
+      "name": "에기르",
+      "aliases": ["에기르", "에기", "기르"],
+      "description": "1막 : 대지를 부수는 업화의 궤적",
+      "color": "blue",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/kazeros/aegir",
+      "gate_count": {
+        "노말": 2,
+        "하드": 2
+      },
+      "difficulty_stars": {
+        "노말": "⭐☆☆☆☆",
+        "하드": "⭐☆☆☆☆"
+      }
+    },
+    "진아브렐슈드": {
+      "name": "진아브렐슈드",
+      "aliases": ["진아브렐슈드", "진아브"],
+      "description": "2막 : 부유하는 악몽의 진혼곡",
+      "color": "dark_blue",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/kazeros/abrel",
+      "gate_count": {
+        "노말": 3,
+        "하드": 2
+      },
+      "difficulty_stars": {
+        "노말": "⭐⭐⭐☆☆",
+        "하드": "⭐⭐⭐☆☆"
+      }
+    },
+    "모르둠": {
+      "name": "모르둠",
+      "aliases": ["모르둠"],
+      "description": "3막 : 칠흑, 폭풍의 밤",
+      "color": "blue",
+      "difficulties": ["노말", "하드"],
+      "image_path": "images/kazeros/mordum",
+      "gate_count": {
+        "노말": 2,
+        "하드": 2
+      },
+      "difficulty_stars": {
+        "노말": "⭐⭐⭐☆☆",
+        "하드": "⭐⭐⭐☆☆"
+      }
+    }
+  }
+}

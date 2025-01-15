@@ -3,8 +3,8 @@
 from bs4 import BeautifulSoup
 from data import Token, GEMINI_API_KEY, CHANNEL_ID #봇 토큰, Gemini API 키
 from datetime import datetime #날짜 라이브러리
-from discord.ext import commands #명령어 라이브러리
 from discord import ButtonStyle, SelectOption #버튼 스타일, 드롭다운 메뉴 옵션 라이브러리
+from discord.ext import commands #명령어 라이브러리
 from discord.ui import Button, View, Select #버튼, 뷰, 드롭다운 메뉴 라이브러리
 from apscheduler.schedulers.asyncio import AsyncIOScheduler #비동기 작업을 처리하기 위한 스케줄러
 from apscheduler.triggers.cron import CronTrigger #스케줄을 설정할 때 CronTrigger 사용
@@ -12,6 +12,9 @@ import google.generativeai as genai #Gemini API 라이브러리
 import discord #디스코드 라이브러리
 import asyncio #비동기 라이브러리
 import calendar #달력 라이브러리
+import json
+from typing import Dict, List, Optional, Any
+
 
 
 # Gemini API 설정
@@ -829,647 +832,257 @@ class MultiPollView(View):
 
 #====================================[보스 공략 명령어]======================================
 
+
 class BossStrategy(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.boss_data: Dict[str, Any] = self._load_boss_data() # 보스 데이터 로드
 
-    @commands.group(name='보스', aliases=['boss', 'b'])
-    async def boss(self, ctx):
-        """보스 공략 명령어 그룹
-        :param ctx: discord.ext.commands.Context 객체 (명령어 컨텍스트)
+    def _load_boss_data(self) -> Dict[str, Any]:
         """
-        if ctx.invoked_subcommand is None:  # 하위 명령어가 없는 경우
-            if len(ctx.message.content.split()) > 1:  # 잘못된 보스 이름이 입력된 경우
-                embed = discord.Embed(
-                    title="❌ 오류",
-                    description="존재하지 않는 보스입니다.",
-                    color=discord.Color.red()
-                )
-                
-                embed.add_field(
-                    name="군단장 레이드",  # 군단장 레이드
-                    value=(
-                        "• `/보스 발탄` - 마수군단장\n"
-                        "• `/보스 비아키스` - 욕망군단장\n"
-                        "• `/보스 쿠크세이튼` - 광기군단장\n"
-                        "• `/보스 아브렐슈드` - 몽환군단장\n"
-                        "• `/보스 일리아칸` - 질병군단장\n"
-                        "• `/보스 카멘` - 어둠군단장"
-                    ),
-                    inline=False
-                )
-
-                embed.add_field(
-                    name="에픽 레이드",  # 에픽 레이드
-                    value="• `/보스 베히모스` - 폭풍의 지휘관",
-                    inline=False
-                )
-
-                embed.add_field(
-                    name="어비스 레이드",  # 어비스 레이드
-                    value=(
-                        "• `/보스 카양겔` - 영원한 빛의 요람\n"
-                        "• `/보스 상아탑` - 짓밟힌 정원"
-                    ),
-                    inline=False
-                )
-
-                embed.add_field(
-                    name="카제로스 레이드",  # 카제로스 레이드
-                    value=(
-                        "• `/보스 에키드나` - 서막\n"
-                        "• `/보스 에기르` - 1막\n"
-                        "• `/보스 진아브렐슈드` - 2막\n"
-                        "• `/보스 모르둠` - 3막"
-                    ),
-                    inline=False
-                )
-                
-                embed.set_footer(text="💡 전체 보스 목록을 보려면 /보스를 입력하세요.")
-                await ctx.send(embed=embed)
-                return
-
-            # 기본 보스 목록 표시 (기존 코드)
-            embed = discord.Embed(
-                title="🗡️ 로스트아크 레이드 공략",
-                description="원하는 보스의 공략을 보려면 `/보스 [보스이름]`을 입력하세요.",
-                color=discord.Color.blue()
-            )
-
-            # 군단장 레이드
-            embed.add_field(name="🐺 발탄", value="`/보스 발탄` - 마수군단장", inline=True)
-            embed.add_field(name="👻 비아키스", value="`/보스 비아키스` - 욕망군단장", inline=True)
-            embed.add_field(name="🎭 쿠크세이튼", value="`/보스 쿠크세이튼` - 광기군단장", inline=True)
-            embed.add_field(name="🌙 아브렐슈드", value="`/보스 아브렐슈드` - 몽환군단장", inline=True)
-            embed.add_field(name="🦠 일리아칸", value="`/보스 일리아칸` - 질병군단장", inline=True)
-            embed.add_field(name="⚡ 카멘", value="`/보스 카멘` - 어둠군단장", inline=True)
-
-            # 에픽 레이드
-            embed.add_field(name="🐉️ 베히모스", value="`/보스 베히모스` - 폭풍의 지휘관", inline=True)
-
-            # 어비스 레이드
-            embed.add_field(name="✨ 카양겔", value="`/보스 카양겔` - 영원한 빛의 요람", inline=True)            
-            embed.add_field(name="🗼 상아탑", value="`/보스 상아탑` - 짓밟힌 정원", inline=True)
-            
-            # 카제로스 레이드
-            embed.add_field(name="🐍 에키드나", value="`/보스 에키드나` - 서막 : 붉어진 백야의 나선", inline=True)
-            embed.add_field(name="🔔 에기르", value="`/보스 에기르` - 1막 : 대지를 부수는 업화의 궤적", inline=True)
-            embed.add_field(name="🥶 진아브렐슈드", value="`/보스 진아브렐슈드` - 2막 : 부유하는 악몽의 진혼곡", inline=True)
-            embed.add_field(name="⚜ 모르둠", value="`/보스 모르둠` - 3막 : 칠흑, 폭풍의 밤", inline=True)
-            embed.set_footer(text="💡 각 보스의 상세 공략을 보려면 해당 명령어를 입력하세요.")
+        JSON 파일에서 보스 데이터를 로드합니다.
+        :return: 보스 정보를 담은 딕셔너리
+        """
+        with open('boss_data.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data['bosses']
+    
+    async def _send_embed(self, ctx: commands.Context, embed: discord.Embed, files: Optional[List[discord.File]] = None):
+         """
+        임베드와 파일을 전송하는 함수
+        :param ctx: discord.ext.commands.Context 객체 (명령어 컨텍스트)
+        :param embed: discord.Embed 객체 (전송할 임베드)
+        :param files: Optional[List[discord.File]] 객체 (전송할 파일 리스트)
+        """
+         if files:
             await ctx.send(embed=embed)
+            await asyncio.sleep(0.1)  # 0.5초 딜레이
+            await ctx.send(file=files[0])
+         else:
+           await ctx.send(embed=embed)
 
-    async def _send_boss_info(self, ctx, boss_name):
+
+    async def _send_boss_selection(self, ctx: commands.Context, boss_name: str):
+        """
+        보스 선택 임베드 메시지를 보내고 난이도 선택을 처리
+        :param ctx: discord.ext.commands.Context 객체 (명령어 컨텍스트)
+        :param boss_name: str (보스 이름)
+        """
+        boss_info = self.boss_data.get(boss_name)
+        if not boss_info:
+            await ctx.send("해당 보스 정보가 없습니다.")
+            return
+
         embed = discord.Embed(
             title=f"⚔️ {boss_name} 공략 정보 선택",
             description="난이도를 선택하세요.",
             color=discord.Color.gold()
         )
         
-        # 각 보스에 대한 정보, 난이도 종류에 대한 로직을 추가해야 합니다.
-        # 여기서는 임시로 발탄에 대한 정보만 넣고 보스 이름과 난이도에 따라 동작하도록 수정해야합니다.
+        emojis = ['🇳' if d == '노말' else '🇭' for d in boss_info['difficulties']] # 보스 난이도에 따른 이모지 생성
+        emoji_str = ' '.join([f"{e} : {'노말' if e == '🇳' else '하드'}" for e in emojis]) # 이모지를 문자열로 변환
+        embed.add_field(
+            name="난이도 선택",
+            value=emoji_str,
+            inline=False
+        )
         
-        difficulty_emojis = {
-            '발탄': ['🇳', '🇭'],
-            '비아키스': ['🇳', '🇭'],
-            '쿠크세이튼': ['🇳'],
-            '아브렐슈드': ['🇳', '🇭'],
-            '일리아칸': ['🇳', '🇭'],
-            '카멘': ['🇳', '🇭'],
-            '베히모스': ['🇳'],
-            '카양겔': ['🇳', '🇭'],
-            '상아탑': ['🇳', '🇭'],
-            '에키드나': ['🇳', '🇭'],
-            '에기르': ['🇳', '🇭'],
-            '진아브렐슈드': ['🇳', '🇭'],
-            '모르둠' : ['🇳', '🇭'],
-        }
-        
-        if boss_name in difficulty_emojis:  # 보스 이름이 딕셔너리에 있는 경우
-            emojis = difficulty_emojis[boss_name] # 해당 보스의 난이도 이모티콘 가져오기
-            emoji_str = ' '.join([f"{e} : {'노말' if e == '🇳' else '하드'}" for e in emojis])  #난이도 이모티콘을 문자열로 변환
-            embed.add_field(
-                name="난이도 선택",
-                value=emoji_str,
-                inline=False
-            )
-        else:
-            await ctx.send("해당 보스 정보가 없습니다.")
-            return
-
         msg = await ctx.send(embed=embed) # 임베드 메시지 전송
         for emoji in emojis:  # 모든 난이도 이모티콘에 대한 반응 추가
             await msg.add_reaction(emoji) # 메시지에 난이도 이모티콘 추가
-            
-        def check(reaction, user):
+
+        def check(reaction: discord.Reaction, user: discord.User) -> bool:
             """
             반응 확인 함수
             :param reaction: discord.Reaction 객체 (반응)
             :param user: discord.User 객체 (반응한 사용자)
             :return: bool (반응 조건 충족 여부)
             """
-            return user == ctx.author and str(reaction.emoji) in emojis and reaction.message.id == msg.id
-            # 반응한 사용자가 명령어 사용자, 이모티콘이 난이도 이모티콘 중 하나, 반응한 메시지가 현재 메시지인지 확인
+            return user == ctx.author and str(reaction.emoji) in emojis and reaction.message.id == msg.id # 반응한 사용자가 명령어 사용자, 이모티콘이 난이도 이모티콘 중 하나, 반응한 메시지가 현재 메시지인지 확인
         
         try:
-            reaction, user = await self.bot.wait_for('reaction_add', timeout=10.0, check=check)  # 반응 대기 (10초 제한)
-            if str(reaction.emoji) == "🇳": # 노말 이모티콘 반응
-              await self._show_difficulty_info(ctx, boss_name, '노말') # 노말 난이도 정보 표시 함수 호출
-            elif str(reaction.emoji) == "🇭": # 하드 이모티콘 반응
-              await self._show_difficulty_info(ctx, boss_name, '하드') # 하드 난이도 정보 표시 함수 호출
+            reaction, user = await self.bot.wait_for('reaction_add', timeout=10.0, check=check) # 반응 대기 (10초 제한)
+            selected_difficulty = '노말' if str(reaction.emoji) == '🇳' else '하드'
+            await self._show_difficulty_info(ctx, boss_name, selected_difficulty) # 선택된 난이도 정보 표시 함수 호출
         except asyncio.TimeoutError: # 시간 초과 예외 처리
             await msg.delete() # 시간 초과 시 메시지 삭제
-            
+
         await msg.delete()  # 반응 선택 후 메시지 삭제
-    
-    async def _show_difficulty_info(self, ctx, boss_name, difficulty):
+
+    async def _show_difficulty_info(self, ctx: commands.Context, boss_name: str, difficulty: str):
         """
-         선택된 난이도에 맞는 보스 공략 정보 표시
+        선택된 난이도에 맞는 보스 공략 정보 표시
         :param ctx: discord.ext.commands.Context 객체 (명령어 컨텍스트)
         :param boss_name: str (보스 이름)
         :param difficulty: str (난이도)
         """
-        if boss_name == '발탄':
-            await self.valtan(ctx, difficulty)
-        elif boss_name == '비아키스':
-            await self.vykas(ctx, difficulty)
-        elif boss_name == '쿠크세이튼':
-             await self.kouku(ctx, difficulty)
-        elif boss_name == '아브렐슈드':
-            await self.abrelshud(ctx, difficulty)
-        elif boss_name == '일리아칸':
-           await self.illakan(ctx, difficulty)
-        elif boss_name == '카멘':
-            await self.kamen(ctx, difficulty)
-        elif boss_name == '베히모스':
-            await self.behimos(ctx, difficulty)
-        elif boss_name == '카양겔':
-            await self.kayangel(ctx, difficulty)
-        elif boss_name == '상아탑':
-            await self.tower(ctx, difficulty)
-        elif boss_name == '에키드나':
-            await self.ekidna(ctx, difficulty)
-        elif boss_name == '에기르':
-            await self.aegir1(ctx, difficulty)
-        elif boss_name == '진아브렐슈드':
-             await self.abrel(ctx, difficulty)
-        elif boss_name == '모르둠':
-             await self.mordum(ctx, difficulty)
+        boss_info = self.boss_data.get(boss_name)
+        if not boss_info:
+            await ctx.send("해당 보스 정보가 없습니다.")
+            return
+       
+        difficulty_path = 'normal' if difficulty=='노말' else 'hard' # 난이도별 폴더 경로 설정
         
+        if boss_info['gate_count'].get(difficulty, 0) > 0 :
+          for i in range(1, boss_info['gate_count'][difficulty] + 1):
+             file_path = f"{boss_info['image_path']}/{difficulty_path}/{i}gate.png"  # 이미지 파일 경로 생성
+             try: # 이미지 파일이 있는지 확인
+               file = discord.File(file_path, filename=f"{boss_name.lower()}{i}.png") # 이미지 파일 생성
+               
+               embed = discord.Embed(
+                    title=f"⚔️ {boss_info['name']} 공략 ({difficulty}) - {boss_info['description']}",
+                    description=f"{i}번 공략\n난이도: {boss_info['difficulty_stars'][difficulty]}",
+                    color=getattr(discord.Color, boss_info['color'])()
+                )
+               await self._send_embed(ctx, embed, [file])
+             except FileNotFoundError: # 파일이 없을경우 오류 출력
+                await ctx.send(f"오류: `{file_path}` 파일이 없습니다.")
+                return
+        else:
+          await ctx.send("해당 난이도에 대한 정보가 없습니다.")
+          return
 
+    @commands.group(name='보스', aliases=['boss', 'b'])
+    async def boss(self, ctx: commands.Context):
+        """보스 공략 명령어 그룹"""
+        if ctx.invoked_subcommand is None:
+            if len(ctx.message.content.split()) > 1:
+                embed = discord.Embed(
+                    title="❌ 오류",
+                    description="존재하지 않는 보스입니다.",
+                    color=discord.Color.red()
+                )
+                
+                # 보스 목록을 추가하기 위해 설정 파일에서 데이터를 읽어옴
+                for category, bosses in self._group_bosses().items():
+                   boss_list = "\n• ".join([f"`/보스 {boss}` - {self.boss_data[boss]['description']}" for boss in bosses])
+                   embed.add_field(name=category, value=f"• {boss_list}", inline=False)
+                embed.set_footer(text="💡 전체 보스 목록을 보려면 /보스를 입력하세요.")
+                await self._send_embed(ctx, embed) # 오류 임베드 전송
+                return
+
+            # 기본 보스 목록 표시
+            embed = discord.Embed(
+                title="🗡️ 로스트아크 레이드 공략",
+                description="원하는 보스의 공략을 보려면 `/보스 [보스이름]`을 입력하세요.",
+                color=discord.Color.blue()
+            )
+
+            for category, bosses in self._group_bosses().items():
+               for boss in bosses:
+                    embed.add_field(name=f"{boss} ({self.boss_data[boss]['name']})", value=f"`/보스 {boss}` - {self.boss_data[boss]['description']}", inline=True)
+
+            embed.set_footer(text="💡 각 보스의 상세 공략을 보려면 해당 명령어를 입력하세요.")
+            await self._send_embed(ctx, embed)
+    
+    def _group_bosses(self) -> Dict[str, List[str]]:
+      """보스 정보를 종류별로 묶어 반환"""
+      bosses = {
+          '군단장 레이드': [],
+          '에픽 레이드': [],
+          '어비스 레이드': [],
+          '카제로스 레이드': []
+      }
+      
+      for boss_name, boss_info in self.boss_data.items():
+            if '군단장' in boss_info['description']:
+              bosses['군단장 레이드'].append(boss_name)
+            elif '지휘관' in boss_info['description']:
+              bosses['에픽 레이드'].append(boss_name)
+            elif '요람' in boss_info['description'] or '정원' in boss_info['description']:
+                bosses['어비스 레이드'].append(boss_name)
+            elif '막' in boss_info['description'] or '서막' in boss_info['description']:
+                bosses['카제로스 레이드'].append(boss_name)
+      return bosses
+            
     @boss.command(name='발탄')
-    async def valtan(self, ctx, difficulty=None):
+    async def valtan(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """발탄 공략 명령어"""
+        await self._handle_boss_command(ctx, '발탄', difficulty)
+
+    @boss.command(name='비아키스', aliases=['비아'])
+    async def vykas(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """비아키스 공략"""
+        await self._handle_boss_command(ctx, '비아키스', difficulty)
+
+    @boss.command(name='쿠크세이튼', aliases=['쿠크'])
+    async def kouku(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """쿠크세이튼 공략"""
+        await self._handle_boss_command(ctx, '쿠크세이튼', difficulty)
+
+    @boss.command(name='아브렐슈드', aliases=['아브'])
+    async def abrelshud(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """아브렐슈드 공략"""
+        await self._handle_boss_command(ctx, '아브렐슈드', difficulty)
+
+    @boss.command(name='일리아칸', aliases=['일리', '아칸'])
+    async def illakan(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """일리아칸 공략"""
+        await self._handle_boss_command(ctx, '일리아칸', difficulty)
+
+    @boss.command(name='카멘')
+    async def kamen(self, ctx: commands.Context, difficulty: Optional[str] = None):
+       """카멘 공략"""
+       await self._handle_boss_command(ctx, '카멘', difficulty)
+
+    @boss.command(name='베히모스', aliases=['베히'])
+    async def behimos(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """베히모스 공략"""
+        await self._handle_boss_command(ctx, '베히모스', difficulty)
+
+    @boss.command(name='카양겔', aliases=['양겔'])
+    async def kayangel(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """카양겔 공략"""
+        await self._handle_boss_command(ctx, '카양겔', difficulty)
+
+    @boss.command(name='상아탑', aliases=['탑'])
+    async def tower(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """상아탑 공략"""
+        await self._handle_boss_command(ctx, '상아탑', difficulty)
+
+    @boss.command(name='에키드나', aliases=['에키'])
+    async def ekidna(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """에키드나 공략"""
+        await self._handle_boss_command(ctx, '에키드나', difficulty)
+
+    @boss.command(name='에기르', aliases=['에기', '기르'])
+    async def aegir1(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """에기르 공략"""
+        await self._handle_boss_command(ctx, '에기르', difficulty)
+
+    @boss.command(name='진아브렐슈드', aliases=['진아브'])
+    async def abrel(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """진아브렐슈드 공략"""
+        await self._handle_boss_command(ctx, '진아브렐슈드', difficulty)
+
+    @boss.command(name='모르둠')
+    async def mordum(self, ctx: commands.Context, difficulty: Optional[str] = None):
+        """모르둠 공략"""
+        await self._handle_boss_command(ctx, '모르둠', difficulty)
+
+    async def _handle_boss_command(self, ctx: commands.Context, boss_name: str, difficulty: Optional[str] = None):
         """
-        발탄 공략 명령어
+        개별 보스 명령어 처리 함수
         :param ctx: discord.ext.commands.Context 객체 (명령어 컨텍스트)
+        :param boss_name: str (보스 이름)
         :param difficulty: str (난이도, None일 수 있음)
         """
         if difficulty is None:
-            await self._send_boss_info(ctx, '발탄')
+            await self._send_boss_selection(ctx, boss_name) # 난이도 선택 메시지 전송
             return
 
-        if difficulty.lower() not in ['노말', '하드']:
+        if difficulty.lower() not in self.boss_data.get(boss_name,{}).get('difficulties', []): # 입력받은 난이도가 보스 데이터에 있는지 확인
             await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
             return
 
-        embed = discord.Embed(
-            title=f"🐺 발탄 공략 ({difficulty}) - 마수군단장",
-            description=f"난이도: {'⭐☆☆☆☆' if difficulty=='노말' else '⭐☆☆☆☆'}",
-            color=discord.Color.red()
-        )
-        
-        # 난이도별 이미지 경로 설정
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        files = [
-            discord.File(f"images/legion/valtan/{difficulty_path}/1gate.png", filename="valtan1.png"),
-        ]
-        
-        embed.set_image(url="attachment://valtan1.png")
-        await ctx.send(file=files[0], embed=embed)
-
-    @boss.command(name='비아키스', aliases=['비아'])
-    async def vykas(self, ctx, difficulty=None):
-        """비아키스 공략"""
-        if difficulty is None:
-           await self._send_boss_info(ctx, '비아키스')
-           return
-
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(
-            title=f"👻 비아키스 공략 ({difficulty}) - 욕망군단장",
-            description=f"난이도: {'⭐☆☆☆☆' if difficulty=='노말' else '⭐☆☆☆☆'}",
-            color=discord.Color.purple()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        files = [
-            discord.File(f"images/legion/vykas/{difficulty_path}/1gate.png", filename="vykas1.png"),
-        ]
-        
-        embed.set_image(url="attachment://vykas1.png")
-        await ctx.send(file=files[0], embed=embed)
-
-    @boss.command(name='쿠크세이튼', aliases=['쿠크'])
-    async def kouku(self, ctx, difficulty='노말'):
-        """쿠크세이튼 공략"""
-        if difficulty != '노말':
-            await self._send_boss_info(ctx, '쿠크세이튼')
-            return
-
-        if difficulty.lower() not in ['노말']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말)")  
-            return
-
-        embed = discord.Embed(
-            title=f"🎭 쿠크세이튼 공략 ({difficulty}) - 광기군단장",
-            description=f"난이도: {'⭐☆☆☆☆' if difficulty=='노말' else '⭐☆☆☆☆'}",
-            color=discord.Color.dark_gold()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        files = [
-            discord.File(f"images/legion/kouku/{difficulty_path}/1gate.png", filename="kouku1.png"),
-            discord.File(f"images/legion/kouku/{difficulty_path}/2gate.png", filename="kouku2.png"),
-            discord.File(f"images/legion/kouku/{difficulty_path}/3gate.png", filename="kouku3.png"),
-        ]
-        
-        embed.set_image(url="attachment://kouku1.png")
-        embeds = [embed]
-        
-        for i in range(1, len(files)):
-            gate_embed = discord.Embed(
-                title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.dark_gold()
-            )
-            gate_embed.set_image(url=f"attachment://kouku{i+1}.png")
-            embeds.append(gate_embed)
-        
-        await ctx.send(files=files, embeds=embeds)
-
-    @boss.command(name='아브렐슈드', aliases=['아브'])
-    async def abrelshud(self, ctx, difficulty=None):
-        """아브렐슈드 공략"""
-        if difficulty is None:
-           await self._send_boss_info(ctx, '아브렐슈드')
-           return
-
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(
-            title=f"🌙 아브렐슈드 공략 ({difficulty}) - 몽환군단장",
-            description=f"난이도: {'⭐☆☆☆☆' if difficulty=='노말' else '⭐☆☆☆☆'}",
-            color=discord.Color.dark_red()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        files = [
-            discord.File(f"images/legion/abrelshud/{difficulty_path}/1gate.png", filename="abrel1.png"),
-            discord.File(f"images/legion/abrelshud/{difficulty_path}/2gate.png", filename="abrel2.png"),
-        ]
-        
-        embed.set_image(url="attachment://abrel1.png")
-        embeds = [embed]
-        
-        for i in range(1, len(files)):
-            gate_embed = discord.Embed(
-                title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.dark_red()
-            )
-            gate_embed.set_image(url=f"attachment://abrel{i+1}.png")
-            embeds.append(gate_embed)
-        
-        await ctx.send(files=files, embeds=embeds)
-
-    @boss.command(name='일리아칸', aliases=['일리', '아칸'])
-    async def illakan(self, ctx, difficulty=None):
-        """일리아칸 공략"""
-        if difficulty is None:
-            await self._send_boss_info(ctx, '일리아칸')
-            return
-
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(
-            title=f"🦠 일리아칸 공략 ({difficulty}) - 질병군단장",
-            description=f"난이도: {'⭐☆☆☆☆' if difficulty=='노말' else '⭐☆☆☆☆'}",
-            color=discord.Color.gold()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        files = [
-            discord.File(f"images/legion/illakan/{difficulty_path}/1gate.png", filename="illakan1.png"),
-            discord.File(f"images/legion/illakan/{difficulty_path}/2gate.png", filename="illakan2.png"),
-            discord.File(f"images/legion/illakan/{difficulty_path}/3gate.png", filename="illakan3.png"),
-        ]
-        
-        embed.set_image(url="attachment://illakan1.png")
-        embeds = [embed]
-        
-        for i in range(1, len(files)):
-            gate_embed = discord.Embed(
-                title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.gold()
-            )
-            gate_embed.set_image(url=f"attachment://illakan{i+1}.png")
-            embeds.append(gate_embed)
-        
-        await ctx.send(files=files, embeds=embeds)
-
-    @boss.command(name='카멘')
-    async def kamen(self, ctx, difficulty=None):
-        """카멘 공략"""
-        if difficulty is None:
-            await self._send_boss_info(ctx, '카멘')
-            return
-
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(
-            title=f"⚡ 카멘 공략 ({difficulty}) - 어둠군단장",
-            description=f"난이도: {'⭐⭐⭐☆☆' if difficulty=='노말' else '⭐⭐⭐⭐☆'}",
-            color=discord.Color.dark_purple()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        # 난이도별로 다른 관문 수 설정
-        files = [
-            discord.File(f"images/legion/kamen/{difficulty_path}/1gate.png", filename="kamen1.png"),
-            discord.File(f"images/legion/kamen/{difficulty_path}/2gate.png", filename="kamen2.png"),
-        ]
-        
-        # 하드 난이도일 경우 3,4관문 추가
-        if difficulty == '하드':
-            files.extend([
-                discord.File(f"images/legion/kamen/{difficulty_path}/3gate.png", filename="kamen3.png"),
-                discord.File(f"images/legion/kamen/{difficulty_path}/4gate.png", filename="kamen4.png"),
-            ])
-        
-        embed.set_image(url="attachment://kamen1.png")
-        embeds = [embed]
-        
-        for i in range(1, len(files)):
-            gate_embed = discord.Embed(
-                title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.dark_purple() 
-            )
-            gate_embed.set_image(url=f"attachment://kamen{i+1}.png")
-            embeds.append(gate_embed)
-        
-        await ctx.send(files=files, embeds=embeds)
-
-    @boss.command(name='베히모스', aliases=['베히'])
-    async def behimos(self, ctx, difficulty='노말'):
-        """베히모스 공략"""
-        if difficulty != '노말':
-            await self._send_boss_info(ctx, '베히모스')
-            return
-
-        if difficulty.lower() != '노말':  # 노말만 허용
-            await ctx.send("베히모스는 노말 난이도만 존재합니다.")
-            return
-
-        embed = discord.Embed(
-            title=f"🐉️ 베히모스 공략 ({difficulty}) - 폭풍의 지휘관",
-            description="난이도: ⭐☆☆☆☆",  # 노말 난이도로 고정
-            color=discord.Color.blue()
-        )
-        
-        files = [
-            discord.File("images/epic/behimos/normal/1gate.png", filename="behimos1.png"),
-        ]
-        
-        embed.set_image(url="attachment://behimos1.png")
-        await ctx.send(file=files[0], embed=embed)
-
-    @boss.command(name='카양겔', aliases=['양겔'])
-    async def kayangel(self, ctx, difficulty=None):
-        """카양겔 공략"""
-        if difficulty is None:
-            await self._send_boss_info(ctx, '카양겔')
-            return
-
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(
-            title=f"✨ 카양겔 공략 ({difficulty}) - 영원한 빛의 요람",
-            description=f"난이도: {'⭐☆☆☆☆' if difficulty=='노말' else '⭐☆☆☆☆'}",
-            color=discord.Color.blue()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        files = [
-            discord.File(f"images/abyss/kayangel/{difficulty_path}/1gate.png", filename="kayangel1.png"),
-        ]
-        
-        embed.set_image(url="attachment://kayangel1.png")
-        await ctx.send(file=files[0], embed=embed)
-
-    @boss.command(name='상아탑', aliases=['탑'])
-    async def tower(self, ctx, difficulty=None):
-        """상아탑 공략"""
-        if difficulty is None:
-           await self._send_boss_info(ctx, '상아탑')
-           return
-
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(
-            title=f"🗼 상아탑 공략 ({difficulty}) - 짓밟힌 정원",
-            description=f"난이도: {'⭐☆☆☆☆' if difficulty=='노말' else '⭐☆☆☆☆'}",
-            color=discord.Color.light_grey()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        files = [
-            discord.File(f"images/abyss/tower/{difficulty_path}/1gate.png", filename="tower1.png"),
-            discord.File(f"images/abyss/tower/{difficulty_path}/2gate.png", filename="tower2.png"),
-            discord.File(f"images/abyss/tower/{difficulty_path}/3gate.png", filename="tower3.png"),
-        ]
-        
-        embed.set_image(url="attachment://tower1.png")
-        embeds = [embed]
-        
-        for i in range(1, len(files)):
-            gate_embed = discord.Embed(
-                title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.light_grey()
-            )
-            gate_embed.set_image(url=f"attachment://tower{i+1}.png")
-            embeds.append(gate_embed)
-        
-        await ctx.send(files=files, embeds=embeds)
-
-    @boss.command(name='에키드나', aliases=['에키'])
-    async def ekidna(self, ctx, difficulty=None):
-        """에키드나 공략"""
-        if difficulty is None:
-           await self._send_boss_info(ctx, '에키드나')
-           return
-
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(
-            title=f"🐍 에키드나 공략 ({difficulty}) - 서막 : 붉어진 백야의 나선",
-            description=f"난이도: {'⭐⭐☆☆☆' if difficulty=='노말' else '⭐⭐☆☆☆'}",
-            color=discord.Color.green()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        files = [
-            discord.File(f"images/kazeros/ekidna/{difficulty_path}/1gate.png", filename="ekidna1.png"),
-            discord.File(f"images/kazeros/ekidna/{difficulty_path}/2gate.png", filename="ekidna2.png"),
-        ]
-        
-        embed.set_image(url="attachment://ekidna1.png")
-        embeds = [embed]
-        
-        for i in range(1, len(files)):
-            gate_embed = discord.Embed(
-                title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.green()
-            )
-            gate_embed.set_image(url=f"attachment://ekidna{i+1}.png")
-            embeds.append(gate_embed)
-        
-        await ctx.send(files=files, embeds=embeds)
-
-    @boss.command(name='에기르', aliases=['에기', '기르'])
-    async def aegir1(self, ctx, difficulty=None):
-        """에기르 공략"""
-        if difficulty is None:
-            await self._send_boss_info(ctx, '에기르')
-            return
-
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(
-            title=f"🔔 에기르 공략 ({difficulty}) - 1막 : 대지를 부수는 업화의 궤적",
-            description=f"난이도: {'⭐☆☆☆☆' if difficulty=='노말' else '⭐☆☆☆☆'}",
-            color=discord.Color.blue()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        files = [
-            discord.File(f"images/kazeros/aegir/{difficulty_path}/1gate.png", filename="aegir1.png"),
-            discord.File(f"images/kazeros/aegir/{difficulty_path}/2gate.png", filename="aegir2.png"),
-        ]
-        
-        embed.set_image(url="attachment://aegir1.png")
-        embeds = [embed]
-        
-        for i in range(1, len(files)):
-            gate_embed = discord.Embed(
-                title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.blue()
-            )
-            gate_embed.set_image(url=f"attachment://aegir{i+1}.png")
-            embeds.append(gate_embed)
-        
-        await ctx.send(files=files, embeds=embeds)
-
-    @boss.command(name='진아브렐슈드', aliases=['진아브'])
-    async def abrel(self, ctx, difficulty=None):
-        """진아브렐슈드 공략"""
-        if difficulty is None:
-           await self._send_boss_info(ctx, '진아브렐슈드')
-           return
-
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(
-            title=f"🥶 진아브렐슈드 공략 ({difficulty}) - 2막 : 부유하는 악몽의 진혼곡",
-            description=f"난이도: {'⭐⭐⭐☆☆' if difficulty=='노말' else '⭐⭐⭐☆☆'}",
-            color=discord.Color.dark_blue()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        # 난이도별로 다른 관문 수 설정
-        files = [
-            discord.File(f"images/kazeros/abrel/{difficulty_path}/1gate.png", filename="abrel1.png"),
-            discord.File(f"images/kazeros/abrel/{difficulty_path}/2gate.png", filename="abrel2.png"),
-        ]
-        
-        # 노말 난이도일 경우 3관문 추가
-        if difficulty == '노말':
-            files.append(
-                discord.File(f"images/kazeros/abrel/{difficulty_path}/3gate.png", filename="abrel3.png"),
-            )
-        
-        embed.set_image(url="attachment://abrel1.png")
-        embeds = [embed]
-        
-        for i in range(1, len(files)):
-            gate_embed = discord.Embed(
-                title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.dark_blue()
-            )
-            gate_embed.set_image(url=f"attachment://abrel{i+1}.png")
-            embeds.append(gate_embed)
-        
-        await ctx.send(files=files, embeds=embeds)
-
-    @boss.command(name='모르둠')
-    async def mordum(self, ctx, difficulty=None):
-        """모르둠 공략"""
-        if difficulty is None:
-            await self._send_boss_info(ctx, '모르둠')
-            return
-
-        if difficulty.lower() not in ['노말', '하드']:
-            await ctx.send("올바른 난이도를 입력해주세요. (노말/하드)")
-            return
-
-        embed = discord.Embed(                   
-            title=f"⚜ 모르둠 공략 ({difficulty}) - 3막 : 칠흑, 폭풍의 밤",
-            description=f"난이도: {'⭐⭐⭐☆☆' if difficulty=='노말' else '⭐⭐⭐☆☆'}",
-            color=discord.Color.blue()
-        )
-        
-        difficulty_path = 'normal' if difficulty=='노말' else 'hard'
-        files = [
-            discord.File(f"images/kazeros/mordum/{difficulty_path}/1gate.png", filename="mordum1.png"),
-            discord.File(f"images/kazeros/mordum/{difficulty_path}/2gate.png", filename="mordum2.png"),
-        ]
-        
-        embed.set_image(url="attachment://mordum1.png")
-        embeds = [embed]
-        
-        for i in range(1, len(files)):
-            gate_embed = discord.Embed(
-                title=f"{i+1}번 공략 ({difficulty})",
-                color=discord.Color.green()
-            )
-            gate_embed.set_image(url=f"attachment://mordum{i+1}.png")
-            embeds.append(gate_embed)
-        
-        await ctx.send(files=files, embeds=embeds)
-    
+        await self._show_difficulty_info(ctx, boss_name, difficulty) # 선택된 난이도 정보 표시
 
 #====================================[봇 코드]=====================================
 async def setup(bot):
     await bot.add_cog(ChatBot(bot)) #챗봇 명령어
     await bot.add_cog(Schedule(bot)) #일정 투표 명령어
     await bot.add_cog(BossStrategy(bot)) #보스 공략 명령어
-    await bot.add_cog(PolicyCog(bot))
+    await bot.add_cog(PolicyCog(bot)) #정책사항 명령어
 
 
 # 매주 수요일 오전 10시 05분에 공지사항 출력

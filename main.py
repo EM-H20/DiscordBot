@@ -879,7 +879,7 @@ class BossStrategy(commands.Cog):
                     value=(
                         "• `/보스 에키드나` - 서막\n"
                         "• `/보스 에기르` - 1막\n"
-                        "• `/보스 진아브렐슈드` - 2막"
+                        "• `/보스 진아브렐슈드` - 2막\n"
                         "• `/보스 모르둠` - 3막"
                     ),
                     inline=False

@@ -1,3 +1,8 @@
+# Python 가상환경
+.venv/
+venv/
+ENV/
+
 # 환경 변수 파일
 .env
 .env.local
@@ -12,3 +17,7 @@ id_rsa.pub
 # 기타 민감한 정보
 *.key
 *.cert
+
+# 클러드
+.claude
+CLAUDE.md

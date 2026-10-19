@@ -21,3 +21,6 @@ id_rsa.pub
 # 클러드
 .claude
 CLAUDE.md
+# Python 캐시
+__pycache__/
+*.pyc
